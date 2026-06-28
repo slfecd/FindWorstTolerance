@@ -2,14 +2,136 @@
 # - トレラントのワースト１の各要素（頂点、エッジ、面）を探す
 # - FreeCADのトレランス初期値を超える要素を選択（選択色になる）
 #   - なんか頂点選択しても色変化しないので、データム頂点を追加してみた
-# - レポートビューに情報表示
+# - レポートビューにも情報表示
+#
+# - FreeCAD Ver1.1.1 マクロ(.FCMacro)
+# - Windows10 64bit
 
-from typing import Final
+from typing import Final, cast
+from dataclasses import dataclass
+
+# 実行中マクロのファイル名取得に使用
 import os
 import inspect
+
+# FreeCAD
 import FreeCAD as App
 import FreeCADGui as Gui
 import Part
+
+
+FLAG_ADD_DATUM_POINT: Final[bool] = True  # データム点を追加
+
+
+@dataclass
+class ShapeElement:
+    index: int  # UID(将来使うかもしれない用) ん？使わないか・・・どうしよう、これ消したら構造体の意味が（笑）
+    element: Part.Shape
+    # tolerance: float = -1.0
+    # element_type: str | None = None  # "Vertex", "Edge", "Face"
+
+
+# Vertex, Edge, Face の要素を取得する
+def collect_element(obj: Part.Feature) -> list[ShapeElement] | None:
+    if not hasattr(obj, "Shape") or obj.Shape.isNull():
+        return None
+
+    shape: Final = obj.Shape
+    # element_list: list[ShapeElement] = []
+
+    all_raw_elements: Final = [*shape.Vertexes, *shape.Edges, *shape.Faces]
+    element_list: list[ShapeElement] = [
+        # ShapeElement(index=i, element=el, tolerance=el.Tolerance)
+        ShapeElement(index=idx, element=el)
+        for idx, el in enumerate(all_raw_elements)
+    ]
+
+    return element_list if element_list else None
+
+
+# 編集中：リファクタリングだったのに大変更なので新規作成する事にした
+def find_worst_tolerances_2nd(obj: Part.Feature) -> None:
+    STR_ELEMENT_NOT_FOUND: Final[str] = "有効な要否が見つかりませんでした。\n"
+    App.Console.PrintMessage(f"=== トレランス ワースト: {obj.Label} ({obj.Name})\n")
+
+    element_list: Final = collect_element(obj)
+    if not element_list:
+        App.Console.PrintMessage(STR_ELEMENT_NOT_FOUND)  # 要素なし
+        return
+
+    # トレランス閾値（FreeCAD設定値）取得：超えたら要素選択
+    TOLERANCE_TH: Final = cast(float, Part.Precision.confusion())  # type: ignore
+
+    @dataclass
+    class TargetElement:
+        prefix: str
+        obj_class: Part.Shape
+
+    target_definitions: Final[list[TargetElement]] = [
+        TargetElement("[Vertex] ", Part.Vertex),
+        TargetElement("[Edge]   ", Part.Edge),
+        TargetElement("[Face]   ", Part.Face),
+    ]
+
+    for target in target_definitions:
+        prefix = target.prefix
+        # 要素抽出
+        filter_element_list = [
+            item for item in element_list if isinstance(item.element, target.obj_class)
+        ]
+        if not filter_element_list:
+            App.Console.PrintMessage(f"{prefix}{STR_ELEMENT_NOT_FOUND}")  # 要素なし
+            continue
+
+        worst_element = max(
+            filter_element_list, key=lambda item: item.element.Tolerance
+        ).element
+
+        # 結果表示
+        element_tol: float = worst_element.Tolerance
+        (element_type_name, element_index) = cast(
+            tuple[str | None, int], obj.Shape.findSubShape(worst_element)
+        )
+        assert element_type_name is not None, (
+            "FreeCAD returned None for subshape type name"
+        )
+        element_name = f"{element_type_name}{element_index}"
+        App.Console.PrintMessage(
+            f"{prefix}Worst Tolerance: {element_tol:.4E} mm ({element_name})\n"
+        )
+
+        # 要素選択
+        if TOLERANCE_TH < element_tol:
+            Gui.Selection.addSelection(App.ActiveDocument.Name, obj.Name, element_name)
+
+        if FLAG_ADD_DATUM_POINT and isinstance(worst_element, Part.Vertex):
+            # FreeCAD1.1.1 たぶんバグの対策：選択した頂点が選択色に変化しない
+            # データム点を追加する
+            datumPointName = f"DatumPoint_WorstVertex_{obj.Label}"
+            datumPointLabel = f"__WorstVtx_{obj.Label}"
+            doc = App.ActiveDocument
+
+            # 旧データム点を削除
+            old_point = doc.getObject(datumPointName)
+            if old_point:
+                doc.removeObject(old_point.Name)
+
+            # データム点追加
+            d_point = doc.addObject("Part::DatumPoint", datumPointName)
+            if d_point:
+                d_point.Label = datumPointLabel
+                d_point.Label2 = datumPointLabel + " - DatumPoint"
+                d_point.MapMode = "Deactivated"  # アタッチ無し
+                pos = worst_element.Point
+                d_point.Placement.Base = App.Vector(pos.x, pos.y, pos.z)
+
+                # データム点選択
+                Gui.Selection.addSelection(doc.Name, d_point.Name)
+
+    # for target
+
+    App.Console.PrintMessage("===\n")
+    return
 
 
 def find_worst_tolerances(obj: Part.Feature):
@@ -41,7 +163,7 @@ def find_worst_tolerances(obj: Part.Feature):
 
     # Gui.Selection.clearSelection()
     TOLERANCE_TH: Final = (
-        Part.Precision.confusion()
+        Part.Precision.confusion()  # type: ignore
     )  # トレランス閾値＝FreeCAD設定値：超えたら要素選択
 
     # 頂点の結果選択
@@ -108,43 +230,57 @@ def find_worst_tolerances(obj: Part.Feature):
     App.Console.PrintMessage("===\n")
 
 
+# main
+def main() -> None:
+    # モデルツリーで選択されているオブジェクトを取得
+    check_objects: Final = Gui.Selection.getSelection()
+    if not check_objects:
+        App.Console.PrintWarning(
+            "オブジェクトが選択されていません。モデルツリーでオブジェクトを選択してから実行してください。\n"
+        )
+        return
+
+    #
+    Gui.Selection.clearSelection()
+    check_objects_names: Final = [obj.Name for obj in check_objects]
+    for name in check_objects_names:
+        obj = App.ActiveDocument.getObject(name)
+        if (obj is None) or (not hasattr(obj, "Shape")) or obj.Shape.isNull():
+            continue
+
+        #
+        # find_worst_tolerances(obj)
+        find_worst_tolerances_2nd(obj)  # リファクタリングで新規作成したヤツ！
+
+    #
+    # if FLAG_ADD_DATUM_POINT:
+    #     App.ActiveDocument.recompute()
+    Gui.updateGui()
+
+    return
+
+
 # マクロの実行
 if __name__ == "__main__":
     # 実行中マクロのファイル名を取得表示
-    name = "Macro"
+    name: str = ""
     try:
-        frame = inspect.currentframe()
-        if frame is not None:
-            script_path = inspect.getframeinfo(frame).filename
+        frame: Final = inspect.currentframe()
+        if frame:
+            script_path: Final = inspect.getframeinfo(frame).filename
             name = os.path.basename(script_path)
-            if name == "<input>":
-                name = "Pythonコンソール直貼り"
+            # name if name != "<input>" else ""  # Pythonコンソール直貼り
     except Exception:
         pass
     finally:
-        App.Console.PrintMessage(f"*** START: {name} ***\n")
-
-    while True:
-        # モデルツリーで選択されているオブジェクトを取得
-        check_objects = Gui.Selection.getSelection()
-        if not check_objects:
-            App.Console.PrintWarning(
-                "オブジェクトが選択されていません。モデルツリーでオブジェクトを選択してから実行してください。\n"
-            )
-            break
-
-        #
-        Gui.Selection.clearSelection()
-        check_objects_names = [obj.Name for obj in check_objects]
-        for name in check_objects_names:
-            obj = App.ActiveDocument.getObject(name)
-            if (obj is None) or (not hasattr(obj, "Shape")) or obj.Shape.isNull():
-                continue
-            find_worst_tolerances(obj)
-
-        # 正常終了
-        break  # while True
+        name if name != "" else "Macro"
+        App.Console.PrintMessage(f"*** START: {name}\n")
 
     #
-    App.ActiveDocument.recompute()
-    App.Console.PrintMessage("*** END *** \n")
+    main()
+
+    #
+    # if FLAG_ADD_DATUM_POINT:
+    #     App.ActiveDocument.recompute()
+    Gui.updateGui()
+    App.Console.PrintMessage("*** END\n")
