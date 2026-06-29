@@ -61,6 +61,9 @@ def find_worst_tolerances_2nd(obj: Part.Feature) -> None:
 
     # トレランス閾値（FreeCAD設定値）取得：超えたら要素選択
     TOLERANCE_TH: Final = cast(float, Part.Precision.confusion())  # type: ignore
+    assert TOLERANCE_TH == 1e-7, (
+        f"FreeCAD returned Part.Precision.confusion() != 1E-7 : {TOLERANCE_TH:G}"
+    )
 
     @dataclass
     class TargetElement:
@@ -93,11 +96,11 @@ def find_worst_tolerances_2nd(obj: Part.Feature) -> None:
             tuple[str | None, int], obj.Shape.findSubShape(worst_element)
         )
         assert element_type_name is not None, (
-            "FreeCAD returned None for subshape type name"
+            f"FreeCAD returned None for subshape type name:{prefix}{element_tol:G} {worst_element}"
         )
         element_name = f"{element_type_name}{element_index}"
         App.Console.PrintMessage(
-            f"{prefix}Worst Tolerance: {element_tol:.4E} mm ({element_name})\n"
+            f"{prefix}Worst Tolerance: {element_tol:G} mm ({element_name})\n"
         )
 
         # 要素選択
@@ -107,20 +110,37 @@ def find_worst_tolerances_2nd(obj: Part.Feature) -> None:
         if FLAG_ADD_DATUM_POINT and isinstance(worst_element, Part.Vertex):
             # FreeCAD1.1.1 たぶんバグの対策：選択した頂点が選択色に変化しない
             # データム点を追加する
-            datumPointName = f"DatumPoint_WorstVertex_{obj.Label}"
+            TYPEID_DATUM_POINT = "Part::DatumPoint"
             datumPointLabel = f"__WorstVtx_{obj.Label}"
             doc = App.ActiveDocument
 
             # 旧データム点を削除
-            old_point = doc.getObject(datumPointName)
-            if old_point:
-                doc.removeObject(old_point.Name)
+            if True:
+                # 変更中
+                obj_list = cast(
+                    list[Part.Feature], doc.getObjectsByLabel(datumPointLabel)
+                )
+                obj_dp_list = [
+                    item for item in obj_list if item.TypeId == TYPEID_DATUM_POINT
+                ]
+                for obj_dp in obj_dp_list:
+                    doc.removeObject(obj_dp.Name)
+            else:
+                # 変更前
+                datumPointName = (
+                    f"DatumPoint_WorstVertex_{obj.Label}"  # ***BUG*** 不正な名前の筈
+                )
+                old_point = doc.getObject(datumPointName)
+                if old_point:
+                    doc.removeObject(old_point.Name)
 
             # データム点追加
-            d_point = doc.addObject("Part::DatumPoint", datumPointName)
+            # d_point = doc.addObject("Part::DatumPoint", datumPointName)
+            d_point = doc.addObject(TYPEID_DATUM_POINT)
             if d_point:
                 d_point.Label = datumPointLabel
-                d_point.Label2 = datumPointLabel + " - DatumPoint"
+                # d_point.Label2 = datumPointLabel + " - DatumPoint"
+                d_point.Label2 = f"Tolerance {element_tol:g}"
                 d_point.MapMode = "Deactivated"  # アタッチ無し
                 pos = worst_element.Point
                 d_point.Placement.Base = App.Vector(pos.x, pos.y, pos.z)
