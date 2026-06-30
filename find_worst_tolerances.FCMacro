@@ -2,149 +2,178 @@
 # - トレラントのワースト１の各要素（頂点、エッジ、面）を探す
 # - FreeCADのトレランス初期値を超える要素を選択（選択色になる）
 #   - なんか頂点選択しても色変化しないので、データム頂点を追加してみた
-# - レポートビューに情報表示
+# - レポートビューにも情報表示
+#
+# - FreeCAD Ver1.1.1 マクロ(.FCMacro)
+# - Windows10 64bit
 
-from typing import Final
+from typing import Final, cast
+from dataclasses import dataclass
+
+# 実行中マクロのファイル名取得に使用
 import os
 import inspect
+
+# FreeCAD
 import FreeCAD as App
 import FreeCADGui as Gui
 import Part
 
 
-def find_worst_tolerances(obj: Part.Feature):
-    # ワースト要素を記録する変数 [最大トレランス値, 連番インデックス, 所属オブジェクト]
-    worst_vertex = [-1.0, None, None, None]  # float, int, ???Object, VertexObjext
-    worst_edge = [-1.0, None, None]
-    worst_face = [-1.0, None, None]
+FLAG_ADD_DATUM_POINT: Final[bool] = True  # データム点を追加
 
-    if True:  # *** DEBUG インデントと調整
-        shape = obj.Shape
 
-        # 1. 頂点 (Vertex) のチェック
-        for i, v in enumerate(shape.Vertexes):
-            if v.Tolerance > worst_vertex[0]:
-                worst_vertex = [v.Tolerance, i + 1, obj, v]
+@dataclass
+class ShapeElement:
+    index: int  # UID(将来使うかもしれない用) ん？使わないか・・・どうしよう、これ消したら構造体の意味が（笑）
+    element: Part.Shape
 
-        # 2. エッジ (Edge) のチェック
-        for i, e in enumerate(shape.Edges):
-            if e.Tolerance > worst_edge[0]:
-                worst_edge = [e.Tolerance, i + 1, obj]
 
-        # 3. 面 (Face) のチェック
-        for i, f in enumerate(shape.Faces):
-            if f.Tolerance > worst_face[0]:
-                worst_face = [f.Tolerance, i + 1, obj]
+def collect_element(obj: Part.Feature) -> list[ShapeElement] | None:
+    """Vertex, Edge, Face 要素を取得して返す"""
+    if not hasattr(obj, "Shape") or obj.Shape.isNull():
+        return None
 
-    # 結果の表示と3Dビューでの選択処理
+    shape: Final = obj.Shape
+
+    all_raw_elements: Final = [*shape.Vertexes, *shape.Edges, *shape.Faces]
+    element_list: list[ShapeElement] = [
+        ShapeElement(index=idx, element=el) for idx, el in enumerate(all_raw_elements)
+    ]
+
+    return element_list if element_list else None
+
+
+def find_worst_tolerances(obj: Part.Feature) -> None:
+    """Vertex, Edge, Face の要素毎にワーストトレランスを探し、選択状態にする"""
+    STR_ELEMENT_NOT_FOUND: Final[str] = "有効な要否が見つかりませんでした。\n"
     App.Console.PrintMessage(f"=== トレランス ワースト: {obj.Label} ({obj.Name})\n")
 
-    # Gui.Selection.clearSelection()
-    TOLERANCE_TH: Final = (
-        Part.Precision.confusion()
-    )  # トレランス閾値＝FreeCAD設定値：超えたら要素選択
+    element_list: Final = collect_element(obj)
+    if not element_list:
+        App.Console.PrintMessage(STR_ELEMENT_NOT_FOUND)  # 要素なし
+        return
 
-    # 頂点の結果選択
-    if worst_vertex[1] is not None:
-        v_obj = worst_vertex[2]
-        v_name = f"Vertex{worst_vertex[1]}"
+    # トレランス閾値（FreeCAD設定値）取得：超えたら要素選択
+    TOLERANCE_TH: Final = cast(float, Part.Precision.confusion())  # type: ignore
+    assert TOLERANCE_TH == 1e-7, (
+        f"FreeCAD returned Part.Precision.confusion() != 1E-7 : {TOLERANCE_TH:G}"
+    )
+
+    @dataclass
+    class TargetElement:
+        prefix: str
+        obj_class: Part.Shape
+
+    target_definitions: Final[list[TargetElement]] = [
+        TargetElement("[Vertex] ", Part.Vertex),
+        TargetElement("[Edge]   ", Part.Edge),
+        TargetElement("[Face]   ", Part.Face),
+    ]
+
+    for target in target_definitions:
+        prefix = target.prefix
+        # 要素抽出
+        filter_element_list = [
+            item for item in element_list if isinstance(item.element, target.obj_class)
+        ]
+        if not filter_element_list:
+            App.Console.PrintMessage(f"{prefix}{STR_ELEMENT_NOT_FOUND}")  # 要素なし
+            continue
+
+        worst_element = max(
+            filter_element_list, key=lambda item: item.element.Tolerance
+        ).element
+
+        # 結果表示（レポートビュー）
+        element_tol: float = worst_element.Tolerance
+        (element_type_name, element_index) = cast(
+            tuple[str | None, int], obj.Shape.findSubShape(worst_element)
+        )
+        assert element_type_name is not None, (
+            f"FreeCAD returned None for subshape type name:{prefix}{element_tol:G} {worst_element}"
+        )
+        element_name = f"{element_type_name}{element_index}"
         App.Console.PrintMessage(
-            f"[Vertex] Worst Tolerance: {worst_vertex[0]:.4e} mm ({v_name})\n"
+            f"{prefix}Worst Tolerance: {element_tol:G} mm ({element_name})\n"
         )
 
-        if TOLERANCE_TH < worst_vertex[0]:
-            # GUIログの形式に合わせてドキュメント名、オブジェクト名、サブ要素名を正確に分離して渡す
-            Gui.Selection.addSelection(v_obj.Document.Name, v_obj.Name, v_name)
+        # 要素選択
+        if TOLERANCE_TH < element_tol:
+            Gui.Selection.addSelection(App.ActiveDocument.Name, obj.Name, element_name)
 
-            if True:
-                # データム点を追加する（FreeCAD1.1.1 たぶんバグの対策：選択した頂点が選択色に変化しない）
-                datumPointName = f"__WorstVertex_{obj.Label}_DatumPoint__"
-                doc = App.ActiveDocument
+        if FLAG_ADD_DATUM_POINT and isinstance(worst_element, Part.Vertex):
+            # FreeCAD1.1.1 たぶんバグの対策：選択した頂点が選択色に変化しない
+            # データム点を追加する
+            TYPEID_DATUM_POINT = "Part::DatumPoint"
+            datumPointLabel = f"__WorstVtx_{obj.Label}"
+            doc = App.ActiveDocument
 
-                # 旧データム点を削除
-                old_point = doc.getObject(datumPointName)
-                if old_point:
-                    doc.removeObject(old_point.Name)
+            # 旧データム点を削除
+            obj_list = cast(list[Part.Feature], doc.getObjectsByLabel(datumPointLabel))
+            obj_dp_list = [
+                item for item in obj_list if item.TypeId == TYPEID_DATUM_POINT
+            ]
+            for obj_dp in obj_dp_list:
+                doc.removeObject(obj_dp.Name)
 
-                # データム点追加
-                obj = worst_vertex[3]
-                if obj:
-                    p = obj.Point
-                    d_point = doc.addObject("Part::DatumPoint", datumPointName)
-                    d_point.MapMode = "Deactivated"  # アタッチ無し
-                    d_point.Placement.Base = App.Vector(p.x, p.y, p.z)
+            # データム点追加
+            d_point = doc.addObject(TYPEID_DATUM_POINT)
+            if d_point:
+                d_point.Label = datumPointLabel
+                d_point.Label2 = f"Tolerance {element_tol:g}"
+                d_point.MapMode = "Deactivated"  # アタッチ無し
+                pos = worst_element.Point
+                d_point.Placement.Base = App.Vector(pos.x, pos.y, pos.z)
 
-                    # データム点選択
-                    # doc.recompute()
-                    Gui.Selection.addSelection(doc.Name, d_point.Name)
-
-    else:
-        App.Console.PrintMessage("[Vertex] 有効な頂点が見つかりませんでした。\n")
-
-    # エッジの結果選択
-    if worst_edge[1] is not None:
-        e_obj = worst_edge[2]
-        e_name = f"Edge{worst_edge[1]}"
-        App.Console.PrintMessage(
-            f"[Edge]   Worst Tolerance: {worst_edge[0]:.4e} mm ({e_name})\n"
-        )
-        if TOLERANCE_TH < worst_edge[0]:
-            Gui.Selection.addSelection(e_obj.Document.Name, e_obj.Name, e_name)
-    else:
-        App.Console.PrintMessage("[Edge]   有効なエッジが見つかりませんでした。\n")
-
-    # 面の結果選択
-    if worst_face[1] is not None:
-        f_obj = worst_face[2]
-        f_name = f"Face{worst_face[1]}"
-        App.Console.PrintMessage(
-            f"[Face]   Worst Tolerance: {worst_face[0]:.4e} mm ({f_name})\n"
-        )
-        if TOLERANCE_TH < worst_face[0]:
-            Gui.Selection.addSelection(f_obj.Document.Name, f_obj.Name, f_name)
-    else:
-        App.Console.PrintMessage("[Face]   有効な面が見つかりませんでした。\n")
+                # データム点選択
+                Gui.Selection.addSelection(doc.Name, d_point.Name)
+    # for target
 
     App.Console.PrintMessage("===\n")
+    return
+
+
+# main
+def main() -> None:
+    # モデルツリーで選択されているオブジェクトを取得
+    check_objects: Final = Gui.Selection.getSelection()
+    if not check_objects:
+        App.Console.PrintWarning(
+            "オブジェクトが選択されていません。モデルツリーでオブジェクトを選択してから実行してください。\n"
+        )
+        return
+
+    #
+    Gui.Selection.clearSelection()
+    check_objects_names: Final = [obj.Name for obj in check_objects]
+    for name in check_objects_names:
+        obj = App.ActiveDocument.getObject(name)
+        if (obj is None) or (not hasattr(obj, "Shape")) or obj.Shape.isNull():
+            continue
+
+        find_worst_tolerances(obj)
+
+    Gui.updateGui()
+    return
 
 
 # マクロの実行
 if __name__ == "__main__":
     # 実行中マクロのファイル名を取得表示
-    name = "Macro"
+    name: str = ""
     try:
-        frame = inspect.currentframe()
-        if frame is not None:
-            script_path = inspect.getframeinfo(frame).filename
+        frame: Final = inspect.currentframe()
+        if frame:
+            script_path: Final = inspect.getframeinfo(frame).filename
             name = os.path.basename(script_path)
-            if name == "<input>":
-                name = "Pythonコンソール直貼り"
     except Exception:
         pass
     finally:
-        App.Console.PrintMessage(f"*** START: {name} ***\n")
-
-    while True:
-        # モデルツリーで選択されているオブジェクトを取得
-        check_objects = Gui.Selection.getSelection()
-        if not check_objects:
-            App.Console.PrintWarning(
-                "オブジェクトが選択されていません。モデルツリーでオブジェクトを選択してから実行してください。\n"
-            )
-            break
-
-        #
-        Gui.Selection.clearSelection()
-        check_objects_names = [obj.Name for obj in check_objects]
-        for name in check_objects_names:
-            obj = App.ActiveDocument.getObject(name)
-            if (obj is None) or (not hasattr(obj, "Shape")) or obj.Shape.isNull():
-                continue
-            find_worst_tolerances(obj)
-
-        # 正常終了
-        break  # while True
+        name if name != "" else "Macro"
+        App.Console.PrintMessage(f"*** START: {name}\n")
 
     #
-    App.ActiveDocument.recompute()
-    App.Console.PrintMessage("*** END *** \n")
+    main()
+
+    App.Console.PrintMessage("*** END\n")
