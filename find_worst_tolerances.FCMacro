@@ -27,8 +27,6 @@ FLAG_ADD_DATUM_POINT: Final[bool] = True  # データム点を追加
 class ShapeElement:
     index: int  # UID(将来使うかもしれない用) ん？使わないか・・・どうしよう、これ消したら構造体の意味が（笑）
     element: Part.Shape
-    # tolerance: float = -1.0
-    # element_type: str | None = None  # "Vertex", "Edge", "Face"
 
 
 # Vertex, Edge, Face の要素を取得する
@@ -37,20 +35,17 @@ def collect_element(obj: Part.Feature) -> list[ShapeElement] | None:
         return None
 
     shape: Final = obj.Shape
-    # element_list: list[ShapeElement] = []
 
     all_raw_elements: Final = [*shape.Vertexes, *shape.Edges, *shape.Faces]
     element_list: list[ShapeElement] = [
-        # ShapeElement(index=i, element=el, tolerance=el.Tolerance)
-        ShapeElement(index=idx, element=el)
-        for idx, el in enumerate(all_raw_elements)
+        ShapeElement(index=idx, element=el) for idx, el in enumerate(all_raw_elements)
     ]
 
     return element_list if element_list else None
 
 
-# 編集中：リファクタリングだったのに大変更なので新規作成する事にした
-def find_worst_tolerances_2nd(obj: Part.Feature) -> None:
+#
+def find_worst_tolerances(obj: Part.Feature) -> None:
     STR_ELEMENT_NOT_FOUND: Final[str] = "有効な要否が見つかりませんでした。\n"
     App.Console.PrintMessage(f"=== トレランス ワースト: {obj.Label} ({obj.Name})\n")
 
@@ -115,31 +110,17 @@ def find_worst_tolerances_2nd(obj: Part.Feature) -> None:
             doc = App.ActiveDocument
 
             # 旧データム点を削除
-            if True:
-                # 変更中
-                obj_list = cast(
-                    list[Part.Feature], doc.getObjectsByLabel(datumPointLabel)
-                )
-                obj_dp_list = [
-                    item for item in obj_list if item.TypeId == TYPEID_DATUM_POINT
-                ]
-                for obj_dp in obj_dp_list:
-                    doc.removeObject(obj_dp.Name)
-            else:
-                # 変更前
-                datumPointName = (
-                    f"DatumPoint_WorstVertex_{obj.Label}"  # ***BUG*** 不正な名前の筈
-                )
-                old_point = doc.getObject(datumPointName)
-                if old_point:
-                    doc.removeObject(old_point.Name)
+            obj_list = cast(list[Part.Feature], doc.getObjectsByLabel(datumPointLabel))
+            obj_dp_list = [
+                item for item in obj_list if item.TypeId == TYPEID_DATUM_POINT
+            ]
+            for obj_dp in obj_dp_list:
+                doc.removeObject(obj_dp.Name)
 
             # データム点追加
-            # d_point = doc.addObject("Part::DatumPoint", datumPointName)
             d_point = doc.addObject(TYPEID_DATUM_POINT)
             if d_point:
                 d_point.Label = datumPointLabel
-                # d_point.Label2 = datumPointLabel + " - DatumPoint"
                 d_point.Label2 = f"Tolerance {element_tol:g}"
                 d_point.MapMode = "Deactivated"  # アタッチ無し
                 pos = worst_element.Point
@@ -147,107 +128,10 @@ def find_worst_tolerances_2nd(obj: Part.Feature) -> None:
 
                 # データム点選択
                 Gui.Selection.addSelection(doc.Name, d_point.Name)
-
     # for target
 
     App.Console.PrintMessage("===\n")
     return
-
-
-def find_worst_tolerances(obj: Part.Feature):
-    # ワースト要素を記録する変数 [最大トレランス値, 連番インデックス, 所属オブジェクト]
-    worst_vertex = [-1.0, None, None, None]  # float, int, ???Object, VertexObjext
-    worst_edge = [-1.0, None, None]
-    worst_face = [-1.0, None, None]
-
-    if True:  # *** DEBUG インデントと調整
-        shape = obj.Shape
-
-        # 1. 頂点 (Vertex) のチェック
-        for i, v in enumerate(shape.Vertexes):
-            if v.Tolerance > worst_vertex[0]:
-                worst_vertex = [v.Tolerance, i + 1, obj, v]
-
-        # 2. エッジ (Edge) のチェック
-        for i, e in enumerate(shape.Edges):
-            if e.Tolerance > worst_edge[0]:
-                worst_edge = [e.Tolerance, i + 1, obj]
-
-        # 3. 面 (Face) のチェック
-        for i, f in enumerate(shape.Faces):
-            if f.Tolerance > worst_face[0]:
-                worst_face = [f.Tolerance, i + 1, obj]
-
-    # 結果の表示と3Dビューでの選択処理
-    App.Console.PrintMessage(f"=== トレランス ワースト: {obj.Label} ({obj.Name})\n")
-
-    # Gui.Selection.clearSelection()
-    TOLERANCE_TH: Final = (
-        Part.Precision.confusion()  # type: ignore
-    )  # トレランス閾値＝FreeCAD設定値：超えたら要素選択
-
-    # 頂点の結果選択
-    if worst_vertex[1] is not None:
-        v_obj = worst_vertex[2]
-        v_name = f"Vertex{worst_vertex[1]}"
-        App.Console.PrintMessage(
-            f"[Vertex] Worst Tolerance: {worst_vertex[0]:.4e} mm ({v_name})\n"
-        )
-
-        if TOLERANCE_TH < worst_vertex[0]:
-            # GUIログの形式に合わせてドキュメント名、オブジェクト名、サブ要素名を正確に分離して渡す
-            Gui.Selection.addSelection(v_obj.Document.Name, v_obj.Name, v_name)
-
-            if True:
-                # データム点を追加する（FreeCAD1.1.1 たぶんバグの対策：選択した頂点が選択色に変化しない）
-                datumPointName = f"__WorstVertex_{obj.Label}_DatumPoint__"
-                doc = App.ActiveDocument
-
-                # 旧データム点を削除
-                old_point = doc.getObject(datumPointName)
-                if old_point:
-                    doc.removeObject(old_point.Name)
-
-                # データム点追加
-                obj = worst_vertex[3]
-                if obj:
-                    p = obj.Point
-                    d_point = doc.addObject("Part::DatumPoint", datumPointName)
-                    d_point.MapMode = "Deactivated"  # アタッチ無し
-                    d_point.Placement.Base = App.Vector(p.x, p.y, p.z)
-
-                    # データム点選択
-                    # doc.recompute()
-                    Gui.Selection.addSelection(doc.Name, d_point.Name)
-
-    else:
-        App.Console.PrintMessage("[Vertex] 有効な頂点が見つかりませんでした。\n")
-
-    # エッジの結果選択
-    if worst_edge[1] is not None:
-        e_obj = worst_edge[2]
-        e_name = f"Edge{worst_edge[1]}"
-        App.Console.PrintMessage(
-            f"[Edge]   Worst Tolerance: {worst_edge[0]:.4e} mm ({e_name})\n"
-        )
-        if TOLERANCE_TH < worst_edge[0]:
-            Gui.Selection.addSelection(e_obj.Document.Name, e_obj.Name, e_name)
-    else:
-        App.Console.PrintMessage("[Edge]   有効なエッジが見つかりませんでした。\n")
-
-    # 面の結果選択
-    if worst_face[1] is not None:
-        f_obj = worst_face[2]
-        f_name = f"Face{worst_face[1]}"
-        App.Console.PrintMessage(
-            f"[Face]   Worst Tolerance: {worst_face[0]:.4e} mm ({f_name})\n"
-        )
-        if TOLERANCE_TH < worst_face[0]:
-            Gui.Selection.addSelection(f_obj.Document.Name, f_obj.Name, f_name)
-    else:
-        App.Console.PrintMessage("[Face]   有効な面が見つかりませんでした。\n")
-
-    App.Console.PrintMessage("===\n")
 
 
 # main
@@ -268,15 +152,9 @@ def main() -> None:
         if (obj is None) or (not hasattr(obj, "Shape")) or obj.Shape.isNull():
             continue
 
-        #
-        # find_worst_tolerances(obj)
-        find_worst_tolerances_2nd(obj)  # リファクタリングで新規作成したヤツ！
+        find_worst_tolerances(obj)
 
-    #
-    # if FLAG_ADD_DATUM_POINT:
-    #     App.ActiveDocument.recompute()
     Gui.updateGui()
-
     return
 
 
@@ -289,7 +167,6 @@ if __name__ == "__main__":
         if frame:
             script_path: Final = inspect.getframeinfo(frame).filename
             name = os.path.basename(script_path)
-            # name if name != "<input>" else ""  # Pythonコンソール直貼り
     except Exception:
         pass
     finally:
@@ -298,9 +175,6 @@ if __name__ == "__main__":
 
     #
     main()
-
-    #
-    # if FLAG_ADD_DATUM_POINT:
-    #     App.ActiveDocument.recompute()
     Gui.updateGui()
+
     App.Console.PrintMessage("*** END\n")
