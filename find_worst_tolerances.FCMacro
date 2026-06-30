@@ -29,8 +29,8 @@ class ShapeElement:
     element: Part.Shape
 
 
-# Vertex, Edge, Face の要素を取得する
 def collect_element(obj: Part.Feature) -> list[ShapeElement] | None:
+    """Vertex, Edge, Face 要素を取得して返す"""
     if not hasattr(obj, "Shape") or obj.Shape.isNull():
         return None
 
@@ -44,8 +44,8 @@ def collect_element(obj: Part.Feature) -> list[ShapeElement] | None:
     return element_list if element_list else None
 
 
-#
 def find_worst_tolerances(obj: Part.Feature) -> None:
+    """Vertex, Edge, Face の要素毎にワーストトレランスを探し、選択状態にする"""
     STR_ELEMENT_NOT_FOUND: Final[str] = "有効な要否が見つかりませんでした。\n"
     App.Console.PrintMessage(f"=== トレランス ワースト: {obj.Label} ({obj.Name})\n")
 
@@ -85,7 +85,7 @@ def find_worst_tolerances(obj: Part.Feature) -> None:
             filter_element_list, key=lambda item: item.element.Tolerance
         ).element
 
-        # 結果表示
+        # 結果表示（レポートビュー）
         element_tol: float = worst_element.Tolerance
         (element_type_name, element_index) = cast(
             tuple[str | None, int], obj.Shape.findSubShape(worst_element)
@@ -175,6 +175,5 @@ if __name__ == "__main__":
 
     #
     main()
-    Gui.updateGui()
 
     App.Console.PrintMessage("*** END\n")
