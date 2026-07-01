@@ -17,7 +17,7 @@ import inspect
 # FreeCAD
 import FreeCAD as App
 import FreeCADGui as Gui
-import Part
+import Part  # ワークベンチ
 
 
 FLAG_ADD_DATUM_POINT: Final[bool] = True  # データム点を追加
@@ -25,8 +25,11 @@ FLAG_ADD_DATUM_POINT: Final[bool] = True  # データム点を追加
 
 @dataclass
 class ShapeElement:
-    index: int  # UID(将来使うかもしれない用) ん？使わないか・・・どうしよう、これ消したら構造体の意味が（笑）
-    element: Part.Shape
+    # Memo :
+    #   - Document.Feature.Shape.(element)
+    #   - Feature.Document
+    feature_obj: Part.Feature  # Body, Sketch, AdditivePipe, Boolean, Fillet, etc...
+    element: Part.Shape  # Vertex, Edge, Face
 
 
 def collect_element(obj: Part.Feature) -> list[ShapeElement] | None:
@@ -38,27 +41,43 @@ def collect_element(obj: Part.Feature) -> list[ShapeElement] | None:
 
     all_raw_elements: Final = [*shape.Vertexes, *shape.Edges, *shape.Faces]
     element_list: list[ShapeElement] = [
-        ShapeElement(index=idx, element=el) for idx, el in enumerate(all_raw_elements)
+        ShapeElement(element=el, feature_obj=obj) for el in all_raw_elements
     ]
 
     return element_list if element_list else None
 
 
-def find_worst_tolerances(obj: Part.Feature) -> None:
-    """Vertex, Edge, Face の要素毎にワーストトレランスを探し、選択状態にする"""
-    STR_ELEMENT_NOT_FOUND: Final[str] = "有効な要否が見つかりませんでした。\n"
-    App.Console.PrintMessage(f"=== トレランス ワースト: {obj.Label} ({obj.Name})\n")
+def getElementName(shp: ShapeElement) -> str:
+    """要素から Vertex1 Edge2 Face3 のような名前を返す"""
 
-    element_list: Final = collect_element(obj)
-    if not element_list:
-        App.Console.PrintMessage(STR_ELEMENT_NOT_FOUND)  # 要素なし
-        return
+    (element_type_name, element_index) = cast(
+        tuple[str | None, int], shp.feature_obj.findSubShape(shp.element)
+    )
+    assert element_type_name is not None, (
+        "FreeCAD returned None for subshape type name."
+    )
+
+    return f"{element_type_name}{element_index}"
+
+
+def find_worst_tolerance(obj: Part.Feature) -> list[ShapeElement] | None:
+    """Vertex, Edge, Face の要素毎にワーストトレランスを探す"""
+    worst_element_list: list[ShapeElement] = []  # 戻り値
+
+    STR_ELEMENT_NOT_FOUND: Final[str] = "有効な要否が見つかりませんでした。\n"
 
     # トレランス閾値（FreeCAD設定値）取得：超えたら要素選択
     TOLERANCE_TH: Final = cast(float, Part.Precision.confusion())  # type: ignore
     assert TOLERANCE_TH == 1e-7, (
         f"FreeCAD returned Part.Precision.confusion() != 1E-7 : {TOLERANCE_TH:G}"
     )
+
+    App.Console.PrintMessage(f"=== トレランス ワースト: {obj.Label} ({obj.Name})\n")
+
+    element_list: Final = collect_element(obj)
+    if not element_list:
+        App.Console.PrintMessage(STR_ELEMENT_NOT_FOUND)  # 要素なし
+        return
 
     @dataclass
     class TargetElement:
@@ -81,33 +100,41 @@ def find_worst_tolerances(obj: Part.Feature) -> None:
             App.Console.PrintMessage(f"{prefix}{STR_ELEMENT_NOT_FOUND}")  # 要素なし
             continue
 
-        worst_element = max(
-            filter_element_list, key=lambda item: item.element.Tolerance
-        ).element
+        worst_shape = max(filter_element_list, key=lambda item: item.element.Tolerance)
 
         # 結果表示（レポートビュー）
-        element_tol: float = worst_element.Tolerance
-        (element_type_name, element_index) = cast(
-            tuple[str | None, int], obj.Shape.findSubShape(worst_element)
-        )
-        assert element_type_name is not None, (
-            f"FreeCAD returned None for subshape type name:{prefix}{element_tol:G} {worst_element}"
-        )
-        element_name = f"{element_type_name}{element_index}"
+        element_tol: float = worst_shape.element.Tolerance
+        element_name = getElementName(worst_shape)
         App.Console.PrintMessage(
             f"{prefix}Worst Tolerance: {element_tol:G} mm ({element_name})\n"
         )
 
-        # 要素選択
         if TOLERANCE_TH < element_tol:
-            Gui.Selection.addSelection(App.ActiveDocument.Name, obj.Name, element_name)
+            worst_element_list.append(worst_shape)
+    # for target
 
-        if FLAG_ADD_DATUM_POINT and isinstance(worst_element, Part.Vertex):
+    App.Console.PrintMessage("===\n")
+
+    return worst_element_list if worst_element_list else None
+
+
+def elementAddSelection(
+    element_list: list[ShapeElement], flagAddDatumPoint: bool = False
+) -> None:
+    """引数で指定された要素を選択状態にする"""
+    TYPEID_DATUM_POINT: Final = "Part::DatumPoint"
+
+    for item in element_list:
+        obj = item.feature_obj
+        element = item.element
+        element_name = getElementName(element)
+        Gui.Selection.addSelection(obj.Document.Name, obj.Name, element_name)
+
+        if flagAddDatumPoint and isinstance(element, Part.Vertex):
             # FreeCAD1.1.1 たぶんバグの対策：選択した頂点が選択色に変化しない
             # データム点を追加する
-            TYPEID_DATUM_POINT = "Part::DatumPoint"
             datumPointLabel = f"__WorstVtx_{obj.Label}"
-            doc = App.ActiveDocument
+            doc = obj.Document
 
             # 旧データム点を削除
             obj_list = cast(list[Part.Feature], doc.getObjectsByLabel(datumPointLabel))
@@ -121,16 +148,14 @@ def find_worst_tolerances(obj: Part.Feature) -> None:
             d_point = doc.addObject(TYPEID_DATUM_POINT)
             if d_point:
                 d_point.Label = datumPointLabel
-                d_point.Label2 = f"Tolerance {element_tol:g}"
+                d_point.Label2 = f"({element_name}) Tolerance {element.Tolerance:g}"
                 d_point.MapMode = "Deactivated"  # アタッチ無し
-                pos = worst_element.Point
+                pos = element.Point
                 d_point.Placement.Base = App.Vector(pos.x, pos.y, pos.z)
 
                 # データム点選択
                 Gui.Selection.addSelection(doc.Name, d_point.Name)
-    # for target
 
-    App.Console.PrintMessage("===\n")
     return
 
 
@@ -145,14 +170,21 @@ def main() -> None:
         return
 
     #
-    Gui.Selection.clearSelection()
+    worst_element_list: list[ShapeElement] = []
     check_objects_names: Final = [obj.Name for obj in check_objects]
     for name in check_objects_names:
         obj = App.ActiveDocument.getObject(name)
         if (obj is None) or (not hasattr(obj, "Shape")) or obj.Shape.isNull():
             continue
 
-        find_worst_tolerances(obj)
+        element_list = find_worst_tolerance(obj)
+        if element_list:
+            worst_element_list.append(*element_list)
+    # for
+
+    if worst_element_list:
+        Gui.Selection.clearSelection()
+        elementAddSelection(worst_element_list, FLAG_ADD_DATUM_POINT)
 
     Gui.updateGui()
     return
