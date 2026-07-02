@@ -103,33 +103,36 @@ def find_worst_tolerances(obj: Part.Feature) -> None:
         if TOLERANCE_TH < element_tol:
             Gui.Selection.addSelection(obj.Document.Name, obj.Name, element_name)
 
-        if FLAG_ADD_DATUM_POINT and isinstance(worst_element, Part.Vertex):
-            # FreeCAD1.1.1 たぶんバグの対策：選択した頂点が選択色に変化しない
-            # データム点を追加する
-            TYPEID_DATUM_POINT = "Part::DatumPoint"
-            datumPointLabel = f"__WorstVtx_{obj.Label}"
-            # doc = App.ActiveDocument
-            doc = obj.Document
+            if FLAG_ADD_DATUM_POINT and isinstance(worst_element, Part.Vertex):
+                # FreeCAD1.1.1 たぶんバグの対策：選択した頂点が選択色に変化しない
+                # データム点を追加する
+                TYPEID_DATUM_POINT = "Part::DatumPoint"
+                datumPointLabel = f"__WorstVtx_{obj.Label}"
+                # doc = App.ActiveDocument
+                doc = obj.Document
 
-            # 旧データム点を削除
-            obj_list = cast(list[Part.Feature], doc.getObjectsByLabel(datumPointLabel))
-            obj_dp_list = [
-                item for item in obj_list if item.TypeId == TYPEID_DATUM_POINT
-            ]
-            for obj_dp in obj_dp_list:
-                doc.removeObject(obj_dp.Name)
+                # 旧データム点を削除
+                obj_list = cast(
+                    list[Part.Feature], doc.getObjectsByLabel(datumPointLabel)
+                )
+                obj_dp_list = [
+                    item for item in obj_list if item.TypeId == TYPEID_DATUM_POINT
+                ]
+                for obj_dp in obj_dp_list:
+                    doc.removeObject(obj_dp.Name)
 
-            # データム点追加
-            d_point = cast(
-                App.GeoFeature, doc.addObject(TYPEID_DATUM_POINT)
-            )  # エラー時は例外発生
-            d_point.Label = datumPointLabel
-            d_point.Label2 = f"Tolerance {element_tol:g}"
-            d_point.MapMode = "Deactivated"  # type: ignore[attr-defined]  # アタッチ無し(初期値)
-            d_point.Placement.Base = cast(App.Vector, worst_element.Point)
+                # データム点追加
+                d_point = cast(
+                    App.GeoFeature, doc.addObject(TYPEID_DATUM_POINT)
+                )  # エラー時は例外発生
+                d_point.Label = datumPointLabel
+                d_point.Label2 = f"Tolerance {element_tol:g}"
+                d_point.MapMode = "Deactivated"  # type: ignore[attr-defined]  # アタッチ無し(初期値)
+                d_point.Placement.Base = cast(App.Vector, worst_element.Point)
 
-            # データム点選択
-            Gui.Selection.addSelection(doc.Name, d_point.Name)
+                # データム点選択
+                Gui.Selection.addSelection(doc.Name, d_point.Name)
+        # if TOLERANCE_TH < element_tol
     # for target
 
     App.Console.PrintMessage("===\n")
@@ -148,11 +151,11 @@ def main() -> None:
 
     #
     for obj in check_objects:
-        if (not hasattr(obj, "Shape")) or obj.Shape.isNull():
+        if (obj is None) or (not hasattr(obj, "Shape")) or obj.Shape.isNull():
             continue
         find_worst_tolerances(obj)
-        if FLAG_ADD_DATUM_POINT:
-            obj.recompute()
+        # if FLAG_ADD_DATUM_POINT:
+        #     obj.recompute()
 
     # Gui.Selection.clearSelection()
     # check_objects_names: Final = [obj.Name for obj in check_objects]
