@@ -20,7 +20,7 @@ import FreeCADGui as Gui
 import Part
 
 
-FLAG_ADD_DATUM_POINT: Final[bool] = True  # データム点を追加
+FLAG_ADD_DATUM_POINT: Final[bool] = False  # データム点を追加
 
 
 @dataclass
@@ -101,7 +101,9 @@ def find_worst_tolerances(obj: Part.Feature) -> None:
 
         # 要素選択
         if TOLERANCE_TH < element_tol:
-            Gui.Selection.addSelection(obj.Document.Name, obj.Name, element_name)
+            Gui.Selection.addSelection(
+                obj.Document.Name, obj.Name, element_name
+            )  # *** ここはバグの原因ではない
 
             if FLAG_ADD_DATUM_POINT and isinstance(worst_element, Part.Vertex):
                 # FreeCAD1.1.1 たぶんバグの対策：選択した頂点が選択色に変化しない
@@ -150,6 +152,7 @@ def main() -> None:
         return
 
     #
+    Gui.Selection.clearSelection()
     for obj in check_objects:
         if (obj is None) or (not hasattr(obj, "Shape")) or obj.Shape.isNull():
             continue
