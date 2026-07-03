@@ -29,7 +29,10 @@ class ShapeElement:
     #   - Document.Feature.Shape.(element)
     #   - Feature.Document
     feature_obj: Part.Feature  # Body, Sketch, AdditivePipe, Boolean, Fillet, etc...
-    element: Part.Shape  # Vertex, Edge, Face
+    # element: Part.Shape  # Vertex, Edge, Face
+
+    # index: int  # UID(将来使うかもしれない用) ん？使わないか・・・どうしよう、これ消したら構造体の意味が（笑）
+    element: Part.Vertex | Part.Edge | Part.Face
 
 
 def collect_element(obj: Part.Feature) -> list[ShapeElement] | None:
@@ -51,7 +54,8 @@ def getElementName(shp: ShapeElement) -> str:
     """要素から Vertex1 Edge2 Face3 のような名前を返す"""
 
     (element_type_name, element_index) = cast(
-        tuple[str | None, int], shp.feature_obj.findSubShape(shp.element)
+        tuple[str | None, int],
+        shp.feature_obj.findSubShape(shp.element),  # type: ignore[attr-defined]  # freecad-stubs (1.0.21) に定義なし
     )
     assert element_type_name is not None, (
         "FreeCAD returned None for subshape type name."
@@ -82,7 +86,7 @@ def find_worst_tolerance(obj: Part.Feature) -> list[ShapeElement] | None:
     @dataclass
     class TargetElement:
         prefix: str
-        obj_class: Part.Shape
+        obj_class: type[Part.Vertex | Part.Edge | Part.Face]
 
     target_definitions: Final[list[TargetElement]] = [
         TargetElement("[Vertex] ", Part.Vertex),
@@ -145,16 +149,17 @@ def elementAddSelection(
                 doc.removeObject(obj_dp.Name)
 
             # データム点追加
-            d_point = doc.addObject(TYPEID_DATUM_POINT)
-            if d_point:
-                d_point.Label = datumPointLabel
-                d_point.Label2 = f"({element_name}) Tolerance {element.Tolerance:g}"
-                d_point.MapMode = "Deactivated"  # アタッチ無し
-                pos = element.Point
-                d_point.Placement.Base = App.Vector(pos.x, pos.y, pos.z)
+            d_point = cast(
+                App.GeoFeature,
+                doc.addObject(TYPEID_DATUM_POINT),  # エラー時は例外発生
+            )
+            d_point.Label = datumPointLabel
+            d_point.Label2 = f"({element_name}) Tolerance {element.Tolerance:g}"
+            d_point.MapMode = "Deactivated"  # type: ignore[attr-defined]  # アタッチ無し(初期値)
+            d_point.Placement.Base = cast(App.Vector, element.Point)
 
-                # データム点選択
-                Gui.Selection.addSelection(doc.Name, d_point.Name)
+            # データム点選択
+            Gui.Selection.addSelection(doc.Name, d_point.Name)
 
     return
 
@@ -162,7 +167,7 @@ def elementAddSelection(
 # main
 def main() -> None:
     # モデルツリーで選択されているオブジェクトを取得
-    check_objects: Final = Gui.Selection.getSelection()
+    check_objects: Final[list[Part.Feature]] = Gui.Selection.getSelection()
     if not check_objects:
         App.Console.PrintWarning(
             "オブジェクトが選択されていません。モデルツリーでオブジェクトを選択してから実行してください。\n"
@@ -171,9 +176,7 @@ def main() -> None:
 
     #
     worst_element_list: list[ShapeElement] = []
-    check_objects_names: Final = [obj.Name for obj in check_objects]
-    for name in check_objects_names:
-        obj = App.ActiveDocument.getObject(name)
+    for obj in check_objects:
         if (obj is None) or (not hasattr(obj, "Shape")) or obj.Shape.isNull():
             continue
 
@@ -185,6 +188,8 @@ def main() -> None:
     if worst_element_list:
         Gui.Selection.clearSelection()
         elementAddSelection(worst_element_list, FLAG_ADD_DATUM_POINT)
+        # if FLAG_ADD_DATUM_POINT:
+        #     obj.recompute()
 
     Gui.updateGui()
     return
@@ -193,7 +198,7 @@ def main() -> None:
 # マクロの実行
 if __name__ == "__main__":
     # 実行中マクロのファイル名を取得表示
-    name: str = ""
+    name: str = "Macro"
     try:
         frame: Final = inspect.currentframe()
         if frame:
@@ -201,11 +206,8 @@ if __name__ == "__main__":
             name = os.path.basename(script_path)
     except Exception:
         pass
-    finally:
-        name if name != "" else "Macro"
-        App.Console.PrintMessage(f"*** START: {name}\n")
 
     #
+    App.Console.PrintMessage(f"*** START: {name}\n")
     main()
-
     App.Console.PrintMessage("*** END\n")
