@@ -20,7 +20,7 @@ import FreeCADGui as Gui
 import Part
 
 
-FLAG_ADD_DATUM_POINT: Final[bool] = False  # データム点を追加
+FLAG_ADD_DATUM_POINT: Final[bool] = True  # データム点を追加
 
 
 @dataclass
@@ -89,7 +89,7 @@ def find_worst_tolerances(obj: Part.Feature) -> None:
         element_tol: float = worst_element.Tolerance
         (element_type_name, element_index) = cast(
             tuple[str | None, int],
-            obj.Shape.findSubShape(worst_element),  # type: ignore[attr-defined] # freecad-stubs (1.0.21) に定義がないため一時回避。実行時は動作確認済み
+            obj.Shape.findSubShape(worst_element),  # type: ignore[attr-defined]  # freecad-stubs (1.0.21) に定義なし
         )
         assert element_type_name is not None, (
             f"FreeCAD returned None for subshape type name:{prefix}{element_tol:G} {worst_element}"
@@ -101,9 +101,7 @@ def find_worst_tolerances(obj: Part.Feature) -> None:
 
         # 要素選択
         if TOLERANCE_TH < element_tol:
-            Gui.Selection.addSelection(
-                obj.Document.Name, obj.Name, element_name
-            )  # *** ここはバグの原因ではない
+            Gui.Selection.addSelection(obj.Document.Name, obj.Name, element_name)
 
             if FLAG_ADD_DATUM_POINT and isinstance(worst_element, Part.Vertex):
                 # FreeCAD1.1.1 たぶんバグの対策：選択した頂点が選択色に変化しない
@@ -125,8 +123,9 @@ def find_worst_tolerances(obj: Part.Feature) -> None:
 
                 # データム点追加
                 d_point = cast(
-                    App.GeoFeature, doc.addObject(TYPEID_DATUM_POINT)
-                )  # エラー時は例外発生
+                    App.GeoFeature,
+                    doc.addObject(TYPEID_DATUM_POINT),  # エラー時は例外発生
+                )
                 d_point.Label = datumPointLabel
                 d_point.Label2 = f"Tolerance {element_tol:g}"
                 d_point.MapMode = "Deactivated"  # type: ignore[attr-defined]  # アタッチ無し(初期値)
@@ -160,15 +159,6 @@ def main() -> None:
         # if FLAG_ADD_DATUM_POINT:
         #     obj.recompute()
 
-    # Gui.Selection.clearSelection()
-    # check_objects_names: Final = [obj.Name for obj in check_objects]
-    # for name in check_objects_names:
-    #     obj = App.ActiveDocument.getObject(name)
-    #     if (obj is None) or (not hasattr(obj, "Shape")) or obj.Shape.isNull():
-    #         continue
-
-    #     find_worst_tolerances(obj)
-
     Gui.updateGui()
     return
 
@@ -176,7 +166,7 @@ def main() -> None:
 # マクロの実行
 if __name__ == "__main__":
     # 実行中マクロのファイル名を取得表示
-    name: str = ""
+    name: str = "Macro"
     try:
         frame: Final = inspect.currentframe()
         if frame:
@@ -184,11 +174,8 @@ if __name__ == "__main__":
             name = os.path.basename(script_path)
     except Exception:
         pass
-    finally:
-        name if name != "" else "Macro"
-        App.Console.PrintMessage(f"*** START: {name}\n")
 
     #
+    App.Console.PrintMessage(f"*** START: {name}\n")
     main()
-
     App.Console.PrintMessage("*** END\n")
