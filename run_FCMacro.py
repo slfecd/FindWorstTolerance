@@ -7,7 +7,7 @@
 # - FreeCAD Ver1.1.1
 # - Windows10 64bit
 
-from typing import Final
+from typing import Final, TypeAlias
 import traceback
 
 import os
@@ -48,9 +48,12 @@ def run_macro(path: str) -> bool:
 
 
 #
+SelectElementList: TypeAlias = list[tuple[str, str] | tuple[str, str, str]]
+
+
 def main(single_run_index: None | int = None) -> bool | None:
     # テスト毎に選択する要素定義
-    test_cases: Final[list[list[tuple[str, ...]]]] = [
+    test_cases: Final[list[SelectElementList]] = [
         # Test : Select Origin(原点)
         [("Slider_r0", "Body001", "Origin002.")],
         # Test : Select Sketch
@@ -65,32 +68,33 @@ def main(single_run_index: None | int = None) -> bool | None:
     ]
 
     #
-    def selectAndRun(sel_list: list[tuple[str, ...]]) -> bool:
+    def selectAndRun(sel_list: SelectElementList) -> bool:
         macro_path: Final = os.path.join(
             os.path.dirname(__file__), "find_worst_tolerances.FCMacro"
         )
 
         Gui.Selection.clearSelection()
         for sel in sel_list:
-            Gui.Selection.addSelection(*sel)  # タプルを展開して渡す
-
+            # タプルを展開して渡す
+            # FreeCADのスタブ(_Selection.pyi)のオーバーロード定義が不完全なため
+            # Pylanceが誤検知する。実行時は正常なためエラーを抑制。
+            Gui.Selection.addSelection(*sel)  # type: ignore[reportCallIssue]
         return run_macro(macro_path)
 
     #
-    flag: bool | None = None
     clearReportView()
+    flag: bool | None = None
 
     if single_run_index is None:
         # Normal test mode
         for index, selections in enumerate(test_cases, start=1):
-            App.Console.PrintMessage("\n")
             App.Console.PrintMessage(f"### [Test {index}]\n")
             flag = selectAndRun(selections)
             if not flag:
                 break  # エラーなら以降のテストを中止
+            App.Console.PrintMessage("\n")
     else:
         # Single test run mode
-        App.Console.PrintMessage("\n")
         App.Console.PrintMessage(f"### [Test Single run : index={single_run_index}]\n")
         flag = selectAndRun(test_cases[single_run_index])
 

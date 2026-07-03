@@ -26,7 +26,7 @@ FLAG_ADD_DATUM_POINT: Final[bool] = True  # データム点を追加
 @dataclass
 class ShapeElement:
     index: int  # UID(将来使うかもしれない用) ん？使わないか・・・どうしよう、これ消したら構造体の意味が（笑）
-    element: Part.Shape
+    element: Part.Vertex | Part.Edge | Part.Face
 
 
 def collect_element(obj: Part.Feature) -> list[ShapeElement] | None:
@@ -63,7 +63,7 @@ def find_worst_tolerances(obj: Part.Feature) -> None:
     @dataclass
     class TargetElement:
         prefix: str
-        obj_class: Part.Shape
+        obj_class: type[Part.Vertex | Part.Edge | Part.Face]
 
     target_definitions: Final[list[TargetElement]] = [
         TargetElement("[Vertex] ", Part.Vertex),
@@ -88,7 +88,8 @@ def find_worst_tolerances(obj: Part.Feature) -> None:
         # 結果表示（レポートビュー）
         element_tol: float = worst_element.Tolerance
         (element_type_name, element_index) = cast(
-            tuple[str | None, int], obj.Shape.findSubShape(worst_element)
+            tuple[str | None, int],
+            obj.Shape.findSubShape(worst_element),  # type: ignore[attr-defined]  # freecad-stubs (1.0.21) に定義なし
         )
         assert element_type_name is not None, (
             f"FreeCAD returned None for subshape type name:{prefix}{element_tol:G} {worst_element}"
@@ -100,34 +101,39 @@ def find_worst_tolerances(obj: Part.Feature) -> None:
 
         # 要素選択
         if TOLERANCE_TH < element_tol:
-            Gui.Selection.addSelection(App.ActiveDocument.Name, obj.Name, element_name)
+            Gui.Selection.addSelection(obj.Document.Name, obj.Name, element_name)
 
-        if FLAG_ADD_DATUM_POINT and isinstance(worst_element, Part.Vertex):
-            # FreeCAD1.1.1 たぶんバグの対策：選択した頂点が選択色に変化しない
-            # データム点を追加する
-            TYPEID_DATUM_POINT = "Part::DatumPoint"
-            datumPointLabel = f"__WorstVtx_{obj.Label}"
-            doc = App.ActiveDocument
+            if FLAG_ADD_DATUM_POINT and isinstance(worst_element, Part.Vertex):
+                # FreeCAD1.1.1 たぶんバグの対策：選択した頂点が選択色に変化しない
+                # データム点を追加する
+                TYPEID_DATUM_POINT = "Part::DatumPoint"
+                datumPointLabel = f"__WorstVtx_{obj.Label}"
+                # doc = App.ActiveDocument
+                doc = obj.Document
 
-            # 旧データム点を削除
-            obj_list = cast(list[Part.Feature], doc.getObjectsByLabel(datumPointLabel))
-            obj_dp_list = [
-                item for item in obj_list if item.TypeId == TYPEID_DATUM_POINT
-            ]
-            for obj_dp in obj_dp_list:
-                doc.removeObject(obj_dp.Name)
+                # 旧データム点を削除
+                obj_list = cast(
+                    list[Part.Feature], doc.getObjectsByLabel(datumPointLabel)
+                )
+                obj_dp_list = [
+                    item for item in obj_list if item.TypeId == TYPEID_DATUM_POINT
+                ]
+                for obj_dp in obj_dp_list:
+                    doc.removeObject(obj_dp.Name)
 
-            # データム点追加
-            d_point = doc.addObject(TYPEID_DATUM_POINT)
-            if d_point:
+                # データム点追加
+                d_point = cast(
+                    App.GeoFeature,
+                    doc.addObject(TYPEID_DATUM_POINT),  # エラー時は例外発生
+                )
                 d_point.Label = datumPointLabel
                 d_point.Label2 = f"Tolerance {element_tol:g}"
-                d_point.MapMode = "Deactivated"  # アタッチ無し
-                pos = worst_element.Point
-                d_point.Placement.Base = App.Vector(pos.x, pos.y, pos.z)
+                d_point.MapMode = "Deactivated"  # type: ignore[attr-defined]  # アタッチ無し(初期値)
+                d_point.Placement.Base = cast(App.Vector, worst_element.Point)
 
                 # データム点選択
                 Gui.Selection.addSelection(doc.Name, d_point.Name)
+        # if TOLERANCE_TH < element_tol
     # for target
 
     App.Console.PrintMessage("===\n")
@@ -137,7 +143,7 @@ def find_worst_tolerances(obj: Part.Feature) -> None:
 # main
 def main() -> None:
     # モデルツリーで選択されているオブジェクトを取得
-    check_objects: Final = Gui.Selection.getSelection()
+    check_objects: Final[list[Part.Feature]] = Gui.Selection.getSelection()
     if not check_objects:
         App.Console.PrintWarning(
             "オブジェクトが選択されていません。モデルツリーでオブジェクトを選択してから実行してください。\n"
@@ -146,13 +152,12 @@ def main() -> None:
 
     #
     Gui.Selection.clearSelection()
-    check_objects_names: Final = [obj.Name for obj in check_objects]
-    for name in check_objects_names:
-        obj = App.ActiveDocument.getObject(name)
+    for obj in check_objects:
         if (obj is None) or (not hasattr(obj, "Shape")) or obj.Shape.isNull():
             continue
-
         find_worst_tolerances(obj)
+        # if FLAG_ADD_DATUM_POINT:
+        #     obj.recompute()
 
     Gui.updateGui()
     return
@@ -161,7 +166,7 @@ def main() -> None:
 # マクロの実行
 if __name__ == "__main__":
     # 実行中マクロのファイル名を取得表示
-    name: str = ""
+    name: str = "Macro"
     try:
         frame: Final = inspect.currentframe()
         if frame:
@@ -169,11 +174,8 @@ if __name__ == "__main__":
             name = os.path.basename(script_path)
     except Exception:
         pass
-    finally:
-        name if name != "" else "Macro"
-        App.Console.PrintMessage(f"*** START: {name}\n")
 
     #
+    App.Console.PrintMessage(f"*** START: {name}\n")
     main()
-
     App.Console.PrintMessage("*** END\n")
