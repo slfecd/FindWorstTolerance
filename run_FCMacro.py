@@ -15,7 +15,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 
 
-def clearReportView() -> None:
+def clear_report_view() -> None:
     """レポートビューをクリアする"""
     from PySide6 import QtWidgets
 
@@ -81,7 +81,7 @@ def main(single_run_index: None | int = None) -> bool | None:
         return run_macro(macro_path)
 
     #
-    clearReportView()
+    clear_report_view()
     flag: bool | None = None
 
     if single_run_index is None:

@@ -54,7 +54,7 @@ def collect_element(obj: Part.Feature) -> list[ShapeElement] | None:
     return element_list if element_list else None
 
 
-def getElementName(se: ShapeElement) -> str:
+def get_element_name(se: ShapeElement) -> str:
     """要素から Vertex1 Edge2 Face3 のような名前を返す"""
 
     assert hasattr(se.feature_obj, "Shape"), (
@@ -91,7 +91,7 @@ def find_worst_tolerance(obj: Part.Feature) -> list[ShapeElement] | None:
     element_list: Final = collect_element(obj)
     if not element_list:
         App.Console.PrintMessage(STR_ELEMENT_NOT_FOUND)  # 要素なし
-        return
+        return None
 
     @dataclass
     class TargetElement:
@@ -118,7 +118,7 @@ def find_worst_tolerance(obj: Part.Feature) -> list[ShapeElement] | None:
 
         # 結果表示（レポートビュー）
         element_tol = cast(float, worst_shape.element.Tolerance)
-        element_name = getElementName(worst_shape)
+        element_name = get_element_name(worst_shape)
         App.Console.PrintMessage(
             f"{prefix}Worst Tolerance: {element_tol:G} mm ({element_name})\n"
         )
@@ -132,7 +132,7 @@ def find_worst_tolerance(obj: Part.Feature) -> list[ShapeElement] | None:
     return worst_element_list if worst_element_list else None
 
 
-def elementAddSelection(
+def element_add_selection(
     element_list: list[ShapeElement], flagAddDatumPoint: bool = False
 ) -> None:
     """引数で指定された要素を選択状態にする"""
@@ -142,7 +142,7 @@ def elementAddSelection(
     for item in element_list:
         obj = item.feature_obj
         element = cast(Ttyp_SubShape, item.element)  # リンター警告バグ？
-        element_name = getElementName(item)
+        element_name = get_element_name(item)
         Gui.Selection.addSelection(obj.Document.Name, obj.Name, element_name)
 
         if flagAddDatumPoint and isinstance(element, Part.Vertex):
@@ -199,7 +199,7 @@ def main() -> None:
     # ワースト要素を選択状態にする
     if worst_element_list:
         Gui.Selection.clearSelection()
-        elementAddSelection(worst_element_list, FLAG_ADD_DATUM_POINT)
+        element_add_selection(worst_element_list, FLAG_ADD_DATUM_POINT)
         # if FLAG_ADD_DATUM_POINT:
         #     obj.recompute()
 
