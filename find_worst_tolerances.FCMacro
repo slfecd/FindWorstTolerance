@@ -7,7 +7,7 @@
 # - FreeCAD Ver1.1.1 マクロ(.FCMacro)
 # - Windows10 64bit
 
-from typing import Final, cast
+from typing import Final, TypeAlias, cast
 from dataclasses import dataclass
 
 # 実行中マクロのファイル名取得に使用
@@ -23,40 +23,49 @@ import Part  # ワークベンチ
 FLAG_ADD_DATUM_POINT: Final[bool] = True  # データム点を追加
 
 
+Ttyp_SubShape: TypeAlias = Part.Vertex | Part.Edge | Part.Face
+
+
 @dataclass
 class ShapeElement:
     # Memo :
     #   - Document.Feature.Shape.(element)
     #   - Feature.Document
     feature_obj: Part.Feature  # Body, Sketch, AdditivePipe, Boolean, Fillet, etc...
-    # element: Part.Shape  # Vertex, Edge, Face
-
-    # index: int  # UID(将来使うかもしれない用) ん？使わないか・・・どうしよう、これ消したら構造体の意味が（笑）
-    element: Part.Vertex | Part.Edge | Part.Face
+    element: Ttyp_SubShape
 
 
 def collect_element(obj: Part.Feature) -> list[ShapeElement] | None:
     """Vertex, Edge, Face 要素を取得して返す"""
-    if not hasattr(obj, "Shape") or obj.Shape.isNull():
+
+    if (not hasattr(obj, "Shape")) or obj.Shape.isNull():
         return None
 
-    shape: Final = obj.Shape
+    shape: Final = cast(Part.Shape, obj.Shape)
 
-    all_raw_elements: Final = [*shape.Vertexes, *shape.Edges, *shape.Faces]
+    all_raw_elements: Final = cast(
+        Ttyp_SubShape, [*shape.Vertexes, *shape.Edges, *shape.Faces]
+    )
     element_list: list[ShapeElement] = [
-        ShapeElement(element=el, feature_obj=obj) for el in all_raw_elements
+        ShapeElement(element=cast(Ttyp_SubShape, el), feature_obj=obj)
+        for el in all_raw_elements  # pyright: ignore[reportUnknownVariableType]
     ]
 
     return element_list if element_list else None
 
 
-def getElementName(shp: ShapeElement) -> str:
+def getElementName(se: ShapeElement) -> str:
     """要素から Vertex1 Edge2 Face3 のような名前を返す"""
+
+    assert hasattr(se.feature_obj, "Shape"), (
+        "ShapeElement.feature_obj に Shapeオブジェクトが必要です"
+    )
 
     (element_type_name, element_index) = cast(
         tuple[str | None, int],
-        shp.feature_obj.findSubShape(shp.element),  # type: ignore[attr-defined]  # freecad-stubs (1.0.21) に定義なし
+        se.feature_obj.Shape.findSubShape(se.element),  # type: ignore[attr-defined]  # freecad-stubs (1.0.21) に定義なし
     )
+
     assert element_type_name is not None, (
         "FreeCAD returned None for subshape type name."
     )
@@ -65,7 +74,8 @@ def getElementName(shp: ShapeElement) -> str:
 
 
 def find_worst_tolerance(obj: Part.Feature) -> list[ShapeElement] | None:
-    """Vertex, Edge, Face の要素毎にワーストトレランスを探す"""
+    """Vertex, Edge, Face 各要素毎のワーストトレランスを返す"""
+
     worst_element_list: list[ShapeElement] = []  # 戻り値
 
     STR_ELEMENT_NOT_FOUND: Final[str] = "有効な要否が見つかりませんでした。\n"
@@ -86,7 +96,7 @@ def find_worst_tolerance(obj: Part.Feature) -> list[ShapeElement] | None:
     @dataclass
     class TargetElement:
         prefix: str
-        obj_class: type[Part.Vertex | Part.Edge | Part.Face]
+        obj_class: type[Ttyp_SubShape]
 
     target_definitions: Final[list[TargetElement]] = [
         TargetElement("[Vertex] ", Part.Vertex),
@@ -107,7 +117,7 @@ def find_worst_tolerance(obj: Part.Feature) -> list[ShapeElement] | None:
         worst_shape = max(filter_element_list, key=lambda item: item.element.Tolerance)
 
         # 結果表示（レポートビュー）
-        element_tol: float = worst_shape.element.Tolerance
+        element_tol = cast(float, worst_shape.element.Tolerance)
         element_name = getElementName(worst_shape)
         App.Console.PrintMessage(
             f"{prefix}Worst Tolerance: {element_tol:G} mm ({element_name})\n"
@@ -126,12 +136,13 @@ def elementAddSelection(
     element_list: list[ShapeElement], flagAddDatumPoint: bool = False
 ) -> None:
     """引数で指定された要素を選択状態にする"""
+
     TYPEID_DATUM_POINT: Final = "Part::DatumPoint"
 
     for item in element_list:
         obj = item.feature_obj
-        element = item.element
-        element_name = getElementName(element)
+        element = cast(Ttyp_SubShape, item.element)  # リンター警告バグ？
+        element_name = getElementName(item)
         Gui.Selection.addSelection(obj.Document.Name, obj.Name, element_name)
 
         if flagAddDatumPoint and isinstance(element, Part.Vertex):
@@ -166,7 +177,7 @@ def elementAddSelection(
 
 # main
 def main() -> None:
-    # モデルツリーで選択されているオブジェクトを取得
+    # 選択オブジェクトを取得
     check_objects: Final[list[Part.Feature]] = Gui.Selection.getSelection()
     if not check_objects:
         App.Console.PrintWarning(
@@ -174,17 +185,18 @@ def main() -> None:
         )
         return
 
-    #
+    # ワースト要素検索
     worst_element_list: list[ShapeElement] = []
     for obj in check_objects:
-        if (obj is None) or (not hasattr(obj, "Shape")) or obj.Shape.isNull():
-            continue
+        # if (obj is None) or (not hasattr(obj, "Shape")) or obj.Shape.isNull():
+        #     continue
 
         element_list = find_worst_tolerance(obj)
         if element_list:
-            worst_element_list.append(*element_list)
+            worst_element_list.extend(element_list)
     # for
 
+    # ワースト要素を選択状態にする
     if worst_element_list:
         Gui.Selection.clearSelection()
         elementAddSelection(worst_element_list, FLAG_ADD_DATUM_POINT)
