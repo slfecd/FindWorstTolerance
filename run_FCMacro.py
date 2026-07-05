@@ -34,15 +34,12 @@ def run_macro(path: str) -> bool:
         with open(path, encoding="utf-8") as f:
             code = f.read()
 
-        # グローバル/ローカルのスコープを明示的に渡してexecを実行
-        # （マクロ内の変数バッティングを防ぐため {} を推奨）
-        exec(code, globals())
+        exec(code, globals().copy())
         return True
 
     except Exception as e:
         print(f"\n[ERROR] マクロ実行中にエラーが発生しました: {e}")
-        # 詳細なスタックトレース（エラーの発生行など）をレポートビューに出力
-        traceback.print_exc()
+        traceback.print_exc()  # スタックトレースをレポートビューに出力
         return False
 
 
