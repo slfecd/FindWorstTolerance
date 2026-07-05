@@ -7,5 +7,11 @@
 	"python.analysis.extraPaths": [
 		"C:/Program Files/FreeCAD 1.1/Mod",
 		"C:/Program Files/FreeCAD 1.1/bin/Lib/site-packages"
-  	],
+	],
+	"python.analysis.diagnosticSeverityOverrides": {
+	"reportUnknownVariableType": "warning",
+    "reportUnknownParameterType": "warning",
+    // "reportUnknownMemberType": "warning",
+    "reportUnknownArgumentType": "warning"
+	},
 }
