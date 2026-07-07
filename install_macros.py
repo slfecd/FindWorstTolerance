@@ -2,14 +2,13 @@
 # カレントディレクトリにある自作マクロを FreeCADに設定されているマクロ保存ディレクトリへ コピーする
 
 from typing import Final, cast
-
-_Version__: Final[str] = "0.0.1"
-__Date__: Final[str] = "2026/07/08"  # YMD
-
 import os
 import shutil
 
 import FreeCAD
+
+__Version__: Final[str] = "0.1.0"
+__Date__: Final[str] = "2026/07/08"  # YMD
 
 FLAG_DRY_RUN: Final[bool] = False  # True=シミュレーション動作  False=本番用
 COPY_FILE_LIST: Final[list[str]] = ["find_worst_tolerances.FCMacro"]
@@ -62,4 +61,5 @@ def main() -> bool:
 
 
 #
-main()
+if __name__ == "__main__":
+    main()
