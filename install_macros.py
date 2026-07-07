@@ -1,71 +1,63 @@
-# まだまだ編集中。実行すると危ないよ。
 # AI生成物を元に改変しています
 # カレントディレクトリにある自作マクロを FreeCADに設定されているマクロ保存ディレクトリへ コピーする
+
 from typing import Final, cast
-import glob
+
+_Version__: Final[str] = "0.0.1"
+__Date__: Final[str] = "2026/07/08"  # YMD
+
 import os
 import shutil
 
 import FreeCAD
 
+FLAG_DRY_RUN: Final[bool] = False  # True=シミュレーション動作  False=本番用
+COPY_FILE_LIST: Final[list[str]] = ["find_worst_tolerances.FCMacro"]
+
 
 def main() -> bool:
+    print("--- マクロをFreeCADマクロパスにコピーします ---")
+
+    # カレントディレクトリ取得
+    src_dir: Final = (
+        os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else ""
+    )  # Source
+
+    print(f"コピー元のパス: {src_dir}")
+    if not src_dir:
+        print("***ERROR: FreeCADでこのマクロファイルを開き実行（Pythonコンソールからは実行できません）、またはFreeCAD同梱pythonから実行してください。")  # fmt: skip
+        return False
+
     # FreeCADの設定からマクロ保存ディレクトリのパス取得
     param_group: Final = cast(
         "FreeCAD.ParameterGrp",  # 実行時に見つからない
         FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Macro"),
     )
-    # "MacroPath", os.path.join(FreeCAD.getUserAppDataDir(), "Macro")
-    macro_dir: Final = cast(str, param_group.GetString("MacroPath"))
+    dst_dir: Final = cast(str, param_group.GetString("MacroPath"))  # Destination
 
-    # カレントディレクトリ取得
-    current_dir: Final = (
-        os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else ""
-    )
-
-    print("--- マクロをFreeCADマクロパスにコピーします ---")
-    print(f"コピー元のパス: {current_dir}")
-    print(f"コピー先のパス: {macro_dir}")
-    if not macro_dir:
+    print(f"コピー先のパス: {dst_dir}\n")
+    if not dst_dir:
         print("***ERROR: FreeCADの【編集→設定→Python→マクロ→マクロのパス】を設定してください")  # fmt: skip
         return False
-    if not current_dir:
-        print("***ERROR: FreeCADでこのマクロファイルを開き実行（Pythonコンソールからは実行できません）、またはFreeCAD同梱pythonから実行してください。")  # fmt: skip
-        return False
 
-    return False  # ***** DEBUG BREAK : 作成中、ここまで動作確認した。 *****
+    # マクロ保存先ディレクトリが無い場合は作成する
+    if not os.path.exists(dst_dir):
+        if not FLAG_DRY_RUN:
+            os.makedirs(dst_dir)
+        print(f"FreeCADマクロ保存ディレクトリを作成しました: {dst_dir}")
 
-    # マクロディレクトリが存在しない場合は作成
-    if not os.path.exists(macro_dir):
-        os.makedirs(macro_dir)
-        print(f"マクロディレクトリを作成しました: {macro_dir}")
+    # File copy
+    for file_name in COPY_FILE_LIST:
+        try:
+            dest_path = os.path.join(dst_dir, file_name)  # os.path.basename(file_path)
+            if not FLAG_DRY_RUN:
+                shutil.copy2(file_name, dest_path)  # 日付属性もコピー
+            print(f"{file_name} --> {dst_dir}")
+        except Exception as e:
+            print(f"***Error: {file_name} のコピーに失敗しました。理由: {e}")
+            return False
+    # for
 
-    # 3. カレントディレクトリ内の「.FCMacro」ファイルを検索してコピー
-    macro_files = glob.glob(os.path.join(current_dir, "*.FCMacro"))
-
-    if not macro_files:
-        print(
-            "警告: カレントディレクトリに '.FCMacro' ファイルが見つかりませんでした。"
-        )
-        print(
-            "特定のフォルダからコピーする場合は、'current_dir' を直接書き換えてください。"
-        )
-    else:
-        copied_count = 0
-        for file_path in macro_files:
-            file_name = os.path.basename(file_path)
-            dest_path = os.path.join(macro_dir, file_name)
-
-            try:
-                shutil.copy2(file_path, dest_path)
-                print(f"成功: {file_name} -> {macro_dir}")
-                copied_count += 1
-            except Exception as e:
-                print(f"エラー: {file_name} のコピーに失敗しました。理由: {e}")
-
-        print(f"--- 処理終了: {copied_count} 個のファイルをコピーしました ---")
-
-    # 終了
     return True
 
 
