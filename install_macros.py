@@ -1,11 +1,15 @@
 # AI生成物を元に改変しています
 # カレントディレクトリにある自作マクロを FreeCADに設定されているマクロ保存ディレクトリへ コピーする
+#
+# - FreeCAD Ver1.1.1
+# - Windows10 64bit
 
 from typing import Final, cast
+
 import os
 import shutil
-
 import FreeCAD
+
 
 __Version__: Final[str] = "0.1.0"
 __Date__: Final[str] = "2026/07/08"  # YMD

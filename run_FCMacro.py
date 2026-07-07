@@ -15,6 +15,10 @@ import FreeCADGui as Gui
 import FreeCAD as App
 
 
+__Version__: Final = "0.1.0"
+__Date__: Final = "2026/07/08"  # YMD
+
+
 def clear_report_view() -> None:
     """レポートビューをクリアする"""
     from PySide6 import QtWidgets
@@ -100,4 +104,5 @@ def main(single_run_index: None | int = None) -> bool | None:
 
 
 #
-main()
+if __name__ == "__main__":
+    main()

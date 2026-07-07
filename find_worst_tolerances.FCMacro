@@ -10,17 +10,17 @@
 from typing import Final, TypeAlias, cast
 from dataclasses import dataclass
 
-# 実行中マクロのファイル名取得に使用
 import os
-import inspect
-
-# FreeCAD
 import FreeCAD as App
 import FreeCADGui as Gui
-import Part  # ワークベンチ
+import Part  # FreeCAD ワークベンチ
 
 
-FLAG_ADD_DATUM_POINT: Final[bool] = True  # データム点を追加
+__Version__: Final[str] = "0.2.1"
+__Date__: Final[str] = "2026/07/08"  # YMD
+
+
+FLAG_ADD_DATUM_POINT: Final[bool] = False  # データム点を追加
 
 
 Ttyp_SubShape: TypeAlias = Part.Vertex | Part.Edge | Part.Face
@@ -78,7 +78,7 @@ def find_worst_tolerance(obj: Part.Feature) -> list[ShapeElement] | None:
 
     worst_element_list: list[ShapeElement] = []  # 戻り値
 
-    STR_ELEMENT_NOT_FOUND: Final[str] = "有効な要否が見つかりませんでした。\n"
+    STR_ELEMENT_NOT_FOUND: Final[str] = "有効な要否が見つかりません\n"
 
     # トレランス閾値（FreeCAD設定値）取得：超えたら要素選択
     TOLERANCE_TH: Final = cast(float, Part.Precision.confusion())  # type: ignore
@@ -188,9 +188,6 @@ def main() -> None:
     # ワースト要素検索
     worst_element_list: list[ShapeElement] = []
     for obj in check_objects:
-        # if (obj is None) or (not hasattr(obj, "Shape")) or obj.Shape.isNull():
-        #     continue
-
         element_list = find_worst_tolerance(obj)
         if element_list:
             worst_element_list.extend(element_list)
@@ -209,17 +206,6 @@ def main() -> None:
 
 # マクロの実行
 if __name__ == "__main__":
-    # 実行中マクロのファイル名を取得表示
-    name: str = "Macro"
-    try:
-        frame: Final = inspect.currentframe()
-        if frame:
-            script_path: Final = inspect.getframeinfo(frame).filename
-            name = os.path.basename(script_path)
-    except Exception:
-        pass
-
-    #
-    App.Console.PrintMessage(f"*** START: {name}\n")
+    App.Console.PrintMessage(f"*** START: {os.path.basename(__file__)}\n")
     main()
     App.Console.PrintMessage("*** END\n")
