@@ -15,7 +15,7 @@ __Version__: Final[str] = "0.1.0"
 __Date__: Final[str] = "2026/07/08"  # YMD
 
 FLAG_DRY_RUN: Final[bool] = False  # True=シミュレーション動作  False=本番用
-COPY_FILE_LIST: Final[list[str]] = ["find_worst_tolerances.FCMacro"]
+COPY_FILE_LIST: Final[list[str]] = ["FindWorstTolerance.FCMacro"]
 
 
 def main() -> bool:

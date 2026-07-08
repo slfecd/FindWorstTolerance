@@ -55,7 +55,7 @@ def selection_and_run(sel_list: Type_SelectionList) -> bool:
     """要素を選択してマクロ実行：成功True エラーFalse を返す"""
 
     macro_path: Final = os.path.join(
-        os.path.dirname(__file__), "find_worst_tolerances.FCMacro"
+        os.path.dirname(__file__), "FindWorstTolerance.FCMacro"
     )
 
     Gui.Selection.clearSelection()
