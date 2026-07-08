@@ -1,10 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 準備中　準備中　準備中　準備中　準備中　準備中　準備中　準備中　準備中　準備中 -->
-<package xmlns="https://www.freecad.org/wiki/Package_Descriptor" Version="1">
-    <Name>FindWorstTolerance</Name>
-    <Description>Finds and selects the worst tolerance elements (Vertex, Edge, Face) exceeding the default threshold.</Description>
-    <Version>0.2.1</Version>
-    <Date>2026-07-08</Date>
-    <!-- <Author>Your Name</Author> -->
-    <!-- <License>LGPL-2.1-or-later</License> <Url type="repository">https://github.com/あなたのユーザー名/FindWorstTolerance</Url> -->
+<package format="1" xmlns="https://wiki.freecad.org/Package_Metadata">
+    <!-- 必須 -->
+    <name>FindWorstTolerance</name>
+    <version>0.2.1</version>
+    <date>2026-07-10</date> <!-- YYYY-MM-DD -->
+    <maintainer email="no-one@freecad.org">No current maintainer</maintainer>
+    <description>Finds and selects the worst tolerance elements (Vertex, Edge, Face) exceeding the default threshold.</description>
+    <license>LGPL-2.1-or-later</license>
+    <!-- <icon></icon> -->
+    <content>
+        <macro>
+            <name>Find worst tolerance</name>
+            <file>FindWorstTolerance.FCMacro</file>
+            <subdirectory>./</subdirectory>
+        </macro>
+    </content>
+
+    <!-- 任意 -->
+    <!-- <url type="repository">https://github.com/yourusername/MyAwesomeMacro</url> -->
+    <tag>Tolerance</tag>
+    <freecadmin>1.0.0</freecadmin> <!-- v1.0での動作は未確認 -->
+    <pythonmin>3.10</pythonmin>
 </package>

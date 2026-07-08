@@ -4,7 +4,7 @@
 # - FreeCADに編集できる状態で読み込み実行しないとエラーになるよ
 #   - ファイルをPythonコンソール・パネルにドラックドロップしちゃダメよ
 #
-# - FreeCAD Ver1.1.1
+# - FreeCAD Ver1.1.1 : Python v3.11.14
 # - Windows10 64bit
 
 from typing import Final, TypeAlias
@@ -15,8 +15,8 @@ import FreeCADGui as Gui
 import FreeCAD as App
 
 
-__Version__: Final = "0.1.0"
-__Date__: Final = "2026/07/08"  # YMD
+__version__: Final = "0.1.1"
+__date__: Final = "2026/07/08"  # YMD
 
 
 def clear_report_view() -> None:

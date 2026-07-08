@@ -1,26 +1,25 @@
 # AI生成物を元に改変しています
-# - トレラントのワースト１の各要素（頂点、エッジ、面）を探す
+# - ワースト・トレラントの各要素（頂点、エッジ、面）を探す
 # - FreeCADのトレランス初期値を超える要素を選択（選択色になる）
 #   - なんか頂点選択しても色変化しないので、データム頂点を追加してみた
 # - レポートビューにも情報表示
+# - バージョン情報などは package.xml を参照してね
 #
-# - FreeCAD Ver1.1.1 マクロ(.FCMacro)
+# - FreeCAD v1.1.1 : Python v3.11.14
 # - Windows10 64bit
 
 from typing import Final, TypeAlias, cast
 from dataclasses import dataclass
 
 import os
+import xml.etree.ElementTree as ET
+
 import FreeCAD as App
 import FreeCADGui as Gui
 import Part  # FreeCAD ワークベンチ
 
 
-__Version__: Final[str] = "0.2.1"
-__Date__: Final[str] = "2026/07/08"  # YMD
-
-
-FLAG_ADD_DATUM_POINT: Final[bool] = False  # データム点を追加
+FLAG_ADD_DATUM_POINT: Final[bool] = False  # True=データム点を追加
 
 
 Ttyp_SubShape: TypeAlias = Part.Vertex | Part.Edge | Part.Face
@@ -114,7 +113,9 @@ def find_worst_tolerance(obj: Part.Feature) -> list[ShapeElement] | None:
             App.Console.PrintMessage(f"{prefix}{STR_ELEMENT_NOT_FOUND}")  # 要素なし
             continue
 
-        worst_shape = max(filter_element_list, key=lambda item: item.element.Tolerance)
+        worst_shape = max(
+            filter_element_list, key=lambda item: cast(float, item.element.Tolerance)
+        )
 
         # 結果表示（レポートビュー）
         element_tol = cast(float, worst_shape.element.Tolerance)
@@ -204,8 +205,58 @@ def main() -> None:
     return
 
 
+@dataclass
+class PackageMeta:
+    name: str = ""
+    version: str = "0.0.0"
+    macro_name: str = ""
+
+
+def get_package_meta(xml_filename: str = "package.xml") -> PackageMeta | None:
+    """
+    パッケージ名、バージョン番号、マクロ名を取得
+    - カレントディレクトリのpackage.xmlファイルを読む
+    - https://wiki.freecad.org/Package_Metadata
+    """
+
+    # マクロファイルと同じディレクトリのパスを取得
+    current_dir: Final = os.path.dirname(os.path.abspath(__file__))
+    xml_path: Final = os.path.join(current_dir, xml_filename)
+    if not os.path.exists(xml_path):
+        return None  # Error
+
+    try:
+        tree: Final = ET.parse(xml_path)
+    except (ET.ParseError, PermissionError, KeyError) as e:
+        App.Console.PrintError(f"XML Parse Error: {str(e)}\n")
+        return None
+
+    root: Final = tree.getroot()
+    if "package" != root.tag:
+        return None  # Error
+
+    def get_meta_text(tag_name: str, default_value: str = "") -> str:
+        if (elm := root.find(tag_name)) is None:
+            return default_value
+        if (text := elm.text) is None:
+            return default_value
+
+        return text.strip()
+
+    # メタ取得
+    meta: PackageMeta = PackageMeta()
+    meta.name = get_meta_text("name")
+    meta.version = get_meta_text("version", meta.version)
+    meta.macro_name = get_meta_text("./content/macro/name")
+
+    return meta
+
+
 # マクロの実行
 if __name__ == "__main__":
-    App.Console.PrintMessage(f"*** START: {os.path.basename(__file__)}\n")
+    if (meta := get_package_meta("package.xml")) is None:
+        meta = PackageMeta()
+
+    App.Console.PrintMessage(f"*** START: {meta.macro_name} v{meta.version}\n")
     main()
     App.Console.PrintMessage("*** END\n")
