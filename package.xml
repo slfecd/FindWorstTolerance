@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 準備中　準備中　準備中　準備中　準備中　準備中　準備中　準備中　準備中　準備中 -->
+<package xmlns="https://www.freecad.org/wiki/Package_Descriptor" Version="1">
+    <Name>FindWorstTolerance</Name>
+    <Description>Finds and selects the worst tolerance elements (Vertex, Edge, Face) exceeding the default threshold.</Description>
+    <Version>0.2.1</Version>
+    <Date>2026-07-08</Date>
+    <!-- <Author>Your Name</Author> -->
+    <!-- <License>LGPL-2.1-or-later</License> <Url type="repository">https://github.com/あなたのユーザー名/FindWorstTolerance</Url> -->
+</package>
