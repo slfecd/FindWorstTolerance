@@ -11,10 +11,12 @@ import shutil
 import FreeCAD
 
 
-__version__: Final[str] = "0.1.1"
+__version__: Final[str] = "0.1.2"
 __date__: Final[str] = "2026/07/10"  # YMD
 
-FLAG_DRY_RUN: Final[bool] = True  # True=シミュレーション動作  False=本番用
+
+FLAG_DRY_RUN: Final[bool] = False  # True=シミュレーション動作  False=本番用
+
 COPY_FILE_LIST: Final[list[str]] = [
     "FindWorstTolerance.FCMacro",
     "package.xml",
@@ -43,7 +45,7 @@ def main() -> bool:
     )
     dst_dir: Final = param_group.GetString("MacroPath")  # Destination
 
-    print(f"コピー先のパス: {dst_dir}\n")
+    print(f"コピー先のパス: {dst_dir}")
     if not dst_dir:
         print("***ERROR: FreeCADの【編集→設定→Python→マクロ→マクロのパス】を設定してください")  # fmt: skip
         return False
@@ -60,7 +62,7 @@ def main() -> bool:
             dest_path = os.path.join(dst_dir, file_name)  # os.path.basename(file_path)
             if not FLAG_DRY_RUN:
                 shutil.copy2(file_name, dest_path)  # 日付属性もコピー
-            print(f"{file_name} --> {dst_dir}")
+            print(f"  {file_name}")
         except Exception as e:
             print(f"***Error: {file_name} のコピーに失敗しました。理由: {e}")
             return False

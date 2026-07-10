@@ -20,6 +20,6 @@
     <!-- 任意 -->
     <!-- <url type="repository">https://github.com/yourusername/MyAwesomeMacro</url> -->
     <tag>Tolerance</tag>
-    <freecadmin>1.0.0</freecadmin> <!-- v1.0での動作は未確認 -->
-    <pythonmin>3.10</pythonmin>
+    <!-- <freecadmin>1.0.0</freecadmin> -->
+    <!-- <pythonmin>3.10</pythonmin> -->
 </package>
