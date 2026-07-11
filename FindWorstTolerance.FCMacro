@@ -1,26 +1,26 @@
 # AI生成物を元に改変しています
-# - トレラントのワースト１の各要素（頂点、エッジ、面）を探す
-# - FreeCADのトレランス初期値を超える要素を選択（選択色になる）
-#   - なんか頂点選択しても色変化しないので、データム頂点を追加してみた
-# - レポートビューにも情報表示
+# - ワースト・トレラントの各要素（頂点、エッジ、面）を探す
+#   - FreeCADのトレランス初期値を超える要素を選択状態にする（選択色に変化）
+#   - レポートビューに結果表示
+# - データム頂点の追加オプション：頂点を選択しても色変化しない事があるため
+# - バージョン情報などは package.xml を参照してね
 #
-# - FreeCAD Ver1.1.1 マクロ(.FCMacro)
+# - FreeCAD v1.1.1 : Python v3.11.14
 # - Windows10 64bit
 
 from typing import Final, TypeAlias, cast
 from dataclasses import dataclass
 
-# 実行中マクロのファイル名取得に使用
 import os
-import inspect
+import re
+import xml.etree.ElementTree as ET
 
-# FreeCAD
 import FreeCAD as App
 import FreeCADGui as Gui
-import Part  # ワークベンチ
+import Part  # FreeCAD ワークベンチ
 
 
-FLAG_ADD_DATUM_POINT: Final[bool] = True  # データム点を追加
+FLAG_ADD_DATUM_POINT: Final[bool] = False  # True=データム点を追加
 
 
 Ttyp_SubShape: TypeAlias = Part.Vertex | Part.Edge | Part.Face
@@ -78,7 +78,7 @@ def find_worst_tolerance(obj: Part.Feature) -> list[ShapeElement] | None:
 
     worst_element_list: list[ShapeElement] = []  # 戻り値
 
-    STR_ELEMENT_NOT_FOUND: Final[str] = "有効な要否が見つかりませんでした。\n"
+    STR_ELEMENT_NOT_FOUND: Final[str] = "有効な要否が見つかりません\n"
 
     # トレランス閾値（FreeCAD設定値）取得：超えたら要素選択
     TOLERANCE_TH: Final = cast(float, Part.Precision.confusion())  # type: ignore
@@ -114,7 +114,9 @@ def find_worst_tolerance(obj: Part.Feature) -> list[ShapeElement] | None:
             App.Console.PrintMessage(f"{prefix}{STR_ELEMENT_NOT_FOUND}")  # 要素なし
             continue
 
-        worst_shape = max(filter_element_list, key=lambda item: item.element.Tolerance)
+        worst_shape = max(
+            filter_element_list, key=lambda item: cast(float, item.element.Tolerance)
+        )
 
         # 結果表示（レポートビュー）
         element_tol = cast(float, worst_shape.element.Tolerance)
@@ -188,9 +190,6 @@ def main() -> None:
     # ワースト要素検索
     worst_element_list: list[ShapeElement] = []
     for obj in check_objects:
-        # if (obj is None) or (not hasattr(obj, "Shape")) or obj.Shape.isNull():
-        #     continue
-
         element_list = find_worst_tolerance(obj)
         if element_list:
             worst_element_list.extend(element_list)
@@ -207,19 +206,63 @@ def main() -> None:
     return
 
 
+@dataclass
+class PackageMeta:
+    name: str = ""
+    version: str = ""
+    macro_name: str = ""
+
+
+def get_package_meta(xml_filename: str = "package.xml") -> PackageMeta | None:
+    """
+    パッケージ名、バージョン番号、マクロ名を取得
+    - カレントディレクトリのpackage.xmlファイルを読む
+    - https://wiki.freecad.org/Package_Metadata
+    """
+
+    # マクロファイルと同じディレクトリのパスを取得
+    current_dir: Final = os.path.dirname(os.path.abspath(__file__))
+    xml_path: Final = os.path.join(current_dir, xml_filename)
+    if not os.path.exists(xml_path):
+        return None  # Error
+
+    try:
+        with open(xml_path, "r", encoding="utf-8") as f:
+            xml_data: Final = f.read()
+
+        # 名前空間 xmlns="..." の記述を削除する
+        xml_data_clean: Final = re.sub(r'\sxmlns="[^"]+"', "", xml_data, count=1)
+        root: Final = ET.fromstring(xml_data_clean)
+
+    except (ET.ParseError, PermissionError, KeyError) as e:
+        App.Console.PrintError(f"XML Parse Error: {str(e)}\n")
+        return None
+
+    if "package" != root.tag:
+        return None  # Error
+
+    def get_meta_text(tag_name: str, default_value: str = "") -> str:
+        if (elm := root.find(tag_name)) is None:
+            return default_value
+        if (text := elm.text) is None:
+            return default_value
+
+        return text.strip()
+
+    # メタ取得
+    meta: PackageMeta = PackageMeta()
+    meta.name = get_meta_text("name", "Macro")
+    meta.version = get_meta_text("version", "0.0.0")
+    meta.macro_name = get_meta_text("./content/macro/name", "Macro")
+
+    return meta
+
+
 # マクロの実行
 if __name__ == "__main__":
-    # 実行中マクロのファイル名を取得表示
-    name: str = "Macro"
-    try:
-        frame: Final = inspect.currentframe()
-        if frame:
-            script_path: Final = inspect.getframeinfo(frame).filename
-            name = os.path.basename(script_path)
-    except Exception:
-        pass
+    if (meta := get_package_meta("package.xml")) is None:
+        meta = PackageMeta()
 
-    #
-    App.Console.PrintMessage(f"*** START: {name}\n")
+    App.Console.PrintMessage(f"*** START: {meta.macro_name} v{meta.version}\n")
     main()
     App.Console.PrintMessage("*** END\n")
