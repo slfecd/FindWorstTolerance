@@ -1,8 +1,8 @@
 # AI生成物を元に改変しています
 # - ワースト・トレラントの各要素（頂点、エッジ、面）を探す
-# - FreeCADのトレランス初期値を超える要素を選択（選択色になる）
-#   - なんか頂点選択しても色変化しないので、データム頂点を追加してみた
-# - レポートビューにも情報表示
+#   - FreeCADのトレランス初期値を超える要素を選択状態にする（選択色に変化）
+#   - レポートビューに結果表示
+# - データム頂点の追加オプション：頂点を選択しても色変化しない事があるため
 # - バージョン情報などは package.xml を参照してね
 #
 # - FreeCAD v1.1.1 : Python v3.11.14
@@ -12,6 +12,7 @@ from typing import Final, TypeAlias, cast
 from dataclasses import dataclass
 
 import os
+import re
 import xml.etree.ElementTree as ET
 
 import FreeCAD as App
@@ -208,7 +209,7 @@ def main() -> None:
 @dataclass
 class PackageMeta:
     name: str = ""
-    version: str = "0.0.0"
+    version: str = ""
     macro_name: str = ""
 
 
@@ -226,12 +227,17 @@ def get_package_meta(xml_filename: str = "package.xml") -> PackageMeta | None:
         return None  # Error
 
     try:
-        tree: Final = ET.parse(xml_path)
+        with open(xml_path, "r", encoding="utf-8") as f:
+            xml_data: Final = f.read()
+
+        # 名前空間 xmlns="..." の記述を削除する
+        xml_data_clean: Final = re.sub(r'\sxmlns="[^"]+"', "", xml_data, count=1)
+        root: Final = ET.fromstring(xml_data_clean)
+
     except (ET.ParseError, PermissionError, KeyError) as e:
         App.Console.PrintError(f"XML Parse Error: {str(e)}\n")
         return None
 
-    root: Final = tree.getroot()
     if "package" != root.tag:
         return None  # Error
 
@@ -245,9 +251,9 @@ def get_package_meta(xml_filename: str = "package.xml") -> PackageMeta | None:
 
     # メタ取得
     meta: PackageMeta = PackageMeta()
-    meta.name = get_meta_text("name")
-    meta.version = get_meta_text("version", meta.version)
-    meta.macro_name = get_meta_text("./content/macro/name")
+    meta.name = get_meta_text("name", "Macro")
+    meta.version = get_meta_text("version", "0.0.0")
+    meta.macro_name = get_meta_text("./content/macro/name", "Macro")
 
     return meta
 
