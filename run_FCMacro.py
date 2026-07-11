@@ -4,7 +4,7 @@
 # - FreeCADに編集できる状態で読み込み実行しないとエラーになるよ
 #   - ファイルをPythonコンソール・パネルにドラックドロップしちゃダメよ
 #
-# - FreeCAD Ver1.1.1
+# - FreeCAD Ver1.1.1 : Python v3.11.14
 # - Windows10 64bit
 
 from typing import Final, TypeAlias
@@ -13,6 +13,10 @@ import traceback
 import os
 import FreeCADGui as Gui
 import FreeCAD as App
+
+
+__version__: Final = "0.1.1"
+__date__: Final = "2026/07/08"  # YMD
 
 
 def clear_report_view() -> None:
@@ -51,7 +55,7 @@ def selection_and_run(sel_list: Type_SelectionList) -> bool:
     """要素を選択してマクロ実行：成功True エラーFalse を返す"""
 
     macro_path: Final = os.path.join(
-        os.path.dirname(__file__), "find_worst_tolerances.FCMacro"
+        os.path.dirname(__file__), "FindWorstTolerance.FCMacro"
     )
 
     Gui.Selection.clearSelection()
@@ -100,4 +104,5 @@ def main(single_run_index: None | int = None) -> bool | None:
 
 
 #
-main()
+if __name__ == "__main__":
+    main()
