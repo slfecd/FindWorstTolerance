@@ -261,7 +261,7 @@ def get_package_meta(xml_filename: str = "package.xml") -> PackageMeta | None:
 # マクロの実行
 if __name__ == "__main__":
     if (meta := get_package_meta("package.xml")) is None:
-        meta = PackageMeta()
+        meta = PackageMeta(macro_name="Macro", version="0.0.0")
 
     App.Console.PrintMessage(f"*** START: {meta.macro_name} v{meta.version}\n")
     main()
