@@ -131,16 +131,17 @@ def find_worst_tolerance(obj: Part.Feature) -> list[ShapeElement] | None:
             ]
 
             # 結果表示（レポートビュー）
+            flag_over_tolerance: bool = TOLERANCE_TH < worst_tolerance
             for worst_shape in worst_shape_list:
                 element_tol = cast(float, worst_shape.element.Tolerance)
                 element_name = get_element_name(worst_shape)
                 App.Console.PrintMessage(
                     f"{prefix}Worst Tolerance: {element_tol} mm ({element_name})\n"
                 )
-                if TOLERANCE_TH >= worst_tolerance:
+                if not flag_over_tolerance:
                     break
 
-            if TOLERANCE_TH < worst_tolerance:
+            if flag_over_tolerance:
                 worst_element_list.extend(worst_shape_list)
         else:
             # 挙動変更前のコード：最初に見つけたワースト要素のみ取得
