@@ -2,8 +2,8 @@
 <package format="1" xmlns="https://wiki.freecad.org/Package_Metadata">
     <!-- 必須 -->
     <name>FindWorstTolerance</name>
-    <version>0.2.1</version>
-    <date>2026-07-12</date> <!-- YYYY-MM-DD -->
+    <version>0.3.0</version>
+    <date>2026-07-14</date> <!-- YYYY-MM-DD -->
     <maintainer email="no-one@freecad.org">No current maintainer</maintainer>
     <description>
 [EN] Finds and selects the worst tolerance elements (Vertex, Edge, Face) exceeding the default threshold.
