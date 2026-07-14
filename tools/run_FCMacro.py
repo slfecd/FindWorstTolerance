@@ -15,8 +15,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 
 
-__version__: Final = "0.1.1"
-__date__: Final = "2026/07/08"  # YMD
+__date__: Final = "2026/07/12"  # YMD
 
 
 def clear_report_view() -> None:
@@ -54,8 +53,8 @@ Type_SelectionList: TypeAlias = list[tuple[str, str] | tuple[str, str, str]]
 def selection_and_run(sel_list: Type_SelectionList) -> bool:
     """要素を選択してマクロ実行：成功True エラーFalse を返す"""
 
-    macro_path: Final = os.path.join(
-        os.path.dirname(__file__), "FindWorstTolerance.FCMacro"
+    macro_path: Final = os.path.normpath(
+        os.path.join(os.path.dirname(__file__), "../FindWorstTolerance.FCMacro")
     )
 
     Gui.Selection.clearSelection()

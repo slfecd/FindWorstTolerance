@@ -1,5 +1,5 @@
 # AI生成物を元に改変しています
-# カレントディレクトリにある自作マクロを FreeCADに設定されているマクロ保存ディレクトリへ コピーする
+# 自作マクロを FreeCADに設定されているマクロ保存ディレクトリへ コピーする
 #
 # - FreeCAD Ver1.1.1 : Python v3.11.14
 # - Windows10 64bit
@@ -11,8 +11,7 @@ import shutil
 import FreeCAD
 
 
-__version__: Final[str] = "0.1.2"
-__date__: Final[str] = "2026/07/10"  # YMD
+__date__: Final[str] = "2026/07/12"  # YMD
 
 
 FLAG_DRY_RUN: Final[bool] = False  # True=シミュレーション動作  False=本番用
@@ -30,7 +29,13 @@ def main() -> bool:
 
     # カレントディレクトリ取得
     src_dir: Final = (
-        os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else ""
+        os.path.normpath(
+            os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), "../"
+            )  # ディレクトリ移動対応
+        )
+        if "__file__" in globals()
+        else ""
     )  # Source
 
     print(f"コピー元のパス: {src_dir}")
@@ -43,7 +48,7 @@ def main() -> bool:
         "FreeCAD.ParameterGrp",  # 実行時に見つからない
         FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Macro"),
     )
-    dst_dir: Final = param_group.GetString("MacroPath")  # Destination
+    dst_dir: Final = os.path.normpath(param_group.GetString("MacroPath"))
 
     print(f"コピー先のパス: {dst_dir}")
     if not dst_dir:

@@ -20,6 +20,7 @@ import FreeCADGui as Gui
 import Part  # FreeCAD ワークベンチ
 
 
+FLAG_SAME_WORST_TOLERANCE_MODE: Final[bool] = True  # 同値ワースト要素を全探索
 FLAG_ADD_DATUM_POINT: Final[bool] = False  # True=データム点を追加
 
 
@@ -114,19 +115,52 @@ def find_worst_tolerance(obj: Part.Feature) -> list[ShapeElement] | None:
             App.Console.PrintMessage(f"{prefix}{STR_ELEMENT_NOT_FOUND}")  # 要素なし
             continue
 
-        worst_shape = max(
-            filter_element_list, key=lambda item: cast(float, item.element.Tolerance)
-        )
+        if FLAG_SAME_WORST_TOLERANCE_MODE:
+            # 同値ワースト複数要素に対応
+            worst_tolerance = cast(
+                float,
+                max(
+                    filter_element_list,
+                    key=lambda item: cast(float, item.element.Tolerance),
+                ).element.Tolerance,
+            )
+            worst_shape_list = [
+                item
+                for item in filter_element_list
+                if item.element.Tolerance >= worst_tolerance
+            ]
 
-        # 結果表示（レポートビュー）
-        element_tol = cast(float, worst_shape.element.Tolerance)
-        element_name = get_element_name(worst_shape)
-        App.Console.PrintMessage(
-            f"{prefix}Worst Tolerance: {element_tol:G} mm ({element_name})\n"
-        )
+            # 結果表示（レポートビュー）
+            flag_over_tolerance: bool = TOLERANCE_TH < worst_tolerance
+            for worst_shape in worst_shape_list:
+                element_tol = cast(float, worst_shape.element.Tolerance)
+                element_name = get_element_name(worst_shape)
+                App.Console.PrintMessage(
+                    f"{prefix}Worst Tolerance: {element_tol} mm ({element_name})\n"
+                )
+                if not flag_over_tolerance:
+                    break
 
-        if TOLERANCE_TH < element_tol:
-            worst_element_list.append(worst_shape)
+            if flag_over_tolerance:
+                worst_element_list.extend(worst_shape_list)
+        else:
+            # 挙動変更前のコード：最初に見つけたワースト要素のみ取得
+            worst_shape = max(
+                filter_element_list,
+                key=lambda item: cast(float, item.element.Tolerance),
+            )
+
+            # 結果表示（レポートビュー）
+            element_tol = cast(float, worst_shape.element.Tolerance)
+            element_name = get_element_name(worst_shape)
+            App.Console.PrintMessage(
+                f"{prefix}Worst Tolerance: {element_tol:G} mm ({element_name})\n"
+            )
+
+            if TOLERANCE_TH < element_tol:
+                worst_element_list.append(worst_shape)
+        # if FLAG_SAME_WORST_TOLERANCE_MODE
+
     # for target
 
     App.Console.PrintMessage("===\n")
@@ -261,7 +295,7 @@ def get_package_meta(xml_filename: str = "package.xml") -> PackageMeta | None:
 # マクロの実行
 if __name__ == "__main__":
     if (meta := get_package_meta("package.xml")) is None:
-        meta = PackageMeta()
+        meta = PackageMeta(macro_name="Macro", version="0.0.0")
 
     App.Console.PrintMessage(f"*** START: {meta.macro_name} v{meta.version}\n")
     main()
