@@ -7,6 +7,9 @@
 #
 # - FreeCAD v1.1.1 : Python v3.11.14
 # - Windows10 64bit
+#
+# BUG情報
+#   - データム系フューチャーでアサート発生 get_element_name() アサート2個目
 
 from typing import Final, TypeAlias, cast
 from dataclasses import dataclass
