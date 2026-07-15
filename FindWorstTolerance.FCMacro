@@ -67,11 +67,17 @@ def get_element_name(se: ShapeElement) -> str:
         se.feature_obj.Shape.findSubShape(se.element),  # type: ignore[attr-defined]  # freecad-stubs (1.0.21) に定義なし
     )
 
-    assert element_type_name is not None, (
-        "FreeCAD returned None for subshape type name."
-    )
+    if False and element_type_name is None:
+        App.Console.PrintLog(
+            f"Shape.findSubShape() return is None. Feature:{se.feature_obj.Label}({se.feature_obj.Name}) , ShapeType:{se.feature_obj.Shape.ShapeType}\n"
+        )
+    # assert element_type_name is not None, (
+    #     "FreeCAD returned None for subshape type name."
+    # )
 
-    return f"{element_type_name}{element_index}"
+    return (
+        f"{element_type_name}{element_index}" if element_type_name is not None else ""
+    )
 
 
 def find_worst_tolerance(obj: Part.Feature) -> list[ShapeElement] | None:
