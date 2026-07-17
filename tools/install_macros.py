@@ -11,13 +11,14 @@ import shutil
 import FreeCAD
 
 
-__date__: Final[str] = "2026/07/12"  # YMD
+__date__: Final[str] = "2026/07/17"  # YMD
 
 
 FLAG_DRY_RUN: Final[bool] = False  # True=シミュレーション動作  False=本番用
 
 COPY_FILE_LIST: Final[list[str]] = [
     "FindWorstTolerance.FCMacro",
+    "FindWorstTolerance.svg",
     "package.xml",
 ]
 
