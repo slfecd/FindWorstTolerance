@@ -6,10 +6,9 @@
     <date>2026-07-16</date> <!-- YYYY-MM-DD -->
     <maintainer email="no-one@freecad.org">No current maintainer</maintainer>
     <description>Finds and selects the worst tolerance elements (Vertex, Edge, Face) exceeding the default threshold.</description>
-    <description xml:lang="ja">ワースト・トレランス要素(Vertex, Edge, Face)を探して選択状態にします</description>
+    <description xml:lang="ja">トレランス値ワースト要素(Vertex, Edge, Face)を探して選択状態にします</description>
     <license>LGPL-2.1-or-later</license>
-    <!-- iconタグはワークベンチ時に必須 -->
-    <!-- <icon></icon> -->
+    <icon>FindWorstTolerance.svg</icon>
     <content>
         <macro>
             <name>Find worst tolerance</name>
