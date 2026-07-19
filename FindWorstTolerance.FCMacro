@@ -93,7 +93,7 @@ def find_worst_tolerance(obj: Part.Feature) -> list[ShapeElement] | None:
         f"FreeCAD returned Part.Precision.confusion() != 1E-7 : {TOLERANCE_TH:G}"
     )
 
-    App.Console.PrintMessage(f"=== トレランス ワースト: {obj.Label} ({obj.Name})\n")
+    App.Console.PrintMessage(f"=== トレランス ワースト: {obj.Label} ({obj.FullName})\n")
 
     element_list: Final = collect_element(obj)
     if not element_list:
@@ -220,7 +220,7 @@ def element_add_selection(
 # main
 def main() -> None:
     # 選択オブジェクトを取得
-    check_objects: Final[list[Part.Feature]] = Gui.Selection.getSelection()
+    check_objects: Final[list[Part.Feature]] = Gui.Selection.getSelection("*")
     if not check_objects:
         App.Console.PrintWarning(
             "オブジェクトが選択されていません。モデルツリーでオブジェクトを選択してから実行してください。\n"
