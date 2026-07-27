@@ -5,6 +5,9 @@
 # - データム頂点の追加オプション：頂点を選択しても色変化しない事があるため
 # - バージョン情報などは package.xml を参照してね
 #
+# SPDX-FileCopyrightText: 2026 ishikawa-slfecd  [slfecd (ishikawa)](https://github.com/slfecd)
+# SPDX-License-Identifier: LGPL-2.1-or-later OR Apache-2.0
+#
 # - FreeCAD v1.1.1 : Python v3.11.14
 # - Windows10 64bit
 

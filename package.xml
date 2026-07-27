@@ -3,22 +3,25 @@
     <!-- 必須 -->
     <name>FindWorstTolerance</name>
     <version>0.3.3</version>
-    <date>2026-07-19</date> <!-- YYYY-MM-DD -->
-    <maintainer email="no-one@freecad.org">No current maintainer</maintainer>
+    <date>2026-07-31</date> <!-- YYYY-MM-DD -->
+    <maintainer email="310196093+slfecd@users.noreply.github">ishikawa-slfecd</maintainer>
     <description>Finds and selects the worst tolerance elements (Vertex, Edge, Face) exceeding the default threshold.</description>
     <description xml:lang="ja">トレランス値ワースト要素(Vertex, Edge, Face)を探して選択状態にします</description>
     <license>LGPL-2.1-or-later</license>
+    <license>Apache-2.0</license> <!-- file="" -->
+    <url type="repository" branch="dev">https://github.com/slfecd/FindWorstTolerance</url> <!-- ***** 開発用ブランチ ***** -->
+    <url type="readme">https://github.com/slfecd/FindWorstTolerance/blob/main/README.md</url>
     <icon>FindWorstTolerance.svg</icon>
     <content>
         <macro>
             <name>Find worst tolerance</name>
-            <file>FindWorstTolerance.FCMacro</file>
             <subdirectory>./</subdirectory>
+            <file>FindWorstTolerance.FCMacro</file>
+            <icon>FindWorstTolerance.svg</icon>
         </macro>
     </content>
 
     <!-- 任意 -->
-    <!-- <url type="repository">https://github.com/yourusername/MyAwesomeMacro</url> -->
     <tag>Tolerance</tag>
     <freecadmin>1.0.0</freecadmin>
     <pythonmin>3.10</pythonmin>

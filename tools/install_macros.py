@@ -1,6 +1,9 @@
 # AI生成物を元に改変しています
 # 自作マクロを FreeCADに設定されているマクロ保存ディレクトリへ コピーする
 #
+# SPDX-FileCopyrightText: 2026 ishikawa-slfecd  [slfecd (ishikawa)](https://github.com/slfecd)
+# SPDX-License-Identifier: LGPL-2.1-or-later OR Apache-2.0
+#
 # - FreeCAD Ver1.1.1 : Python v3.11.14
 # - Windows10 64bit
 
@@ -11,7 +14,7 @@ import shutil
 import FreeCAD
 
 
-__date__: Final[str] = "2026/07/17"  # YMD
+__date__: Final[str] = "2026/07/31"  # YMD
 
 
 FLAG_DRY_RUN: Final[bool] = False  # True=シミュレーション動作  False=本番用
