@@ -2,5 +2,6 @@
 ?*/ export-ignore
 .* export-ignore
 *.code-workspace
-*.txt
 *.log
+*log.txt
+*list.txt
