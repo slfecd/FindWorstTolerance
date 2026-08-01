@@ -9,16 +9,16 @@
     <description xml:lang="ja">トレランス値ワースト要素(Vertex, Edge, Face)を探して選択状態にします</description>
     <license>LGPL-2.1-or-later</license>
     <license>Apache-2.0</license> <!-- file="" 準備中 -->
-    <icon>FindWorstTolerance.svg</icon>
+    <!-- <icon>FindWorstTolerance.svg</icon> -->
+    <url type="repository" branch="dev-addin-install-test">https://github.com/slfecd/FindWorstTolerance</url> <!-- ***** 開発用ブランチ ***** -->
+    <url type="readme">https://github.com/slfecd/FindWorstTolerance/raw/main/README.md</url> <!-- blob ではなく raw か正解 -->
     <content>
         <macro>
             <name>Find worst tolerance</name>
-            <url type="repository" branch="dev-addin-install-test">https://github.com/slfecd/FindWorstTolerance</url> <!-- ***** 開発用ブランチ ***** -->
-            <url type="readme">https://github.com/slfecd/FindWorstTolerance/raw/main/README.md</url> <!-- blob ではなく raw か正解 -->
-            <subdirectory>./</subdirectory>
             <icon>FindWorstTolerance.svg</icon>
-            <file>FindWorstTolerance.svg</file> <!-- 効果なし -->
+            <subdirectory>./</subdirectory>
             <file>FindWorstTolerance.FCMacro</file>
+            <file>FindWorstTolerance.svg</file> <!-- 効果なし -->
         </macro>
     </content>
 
