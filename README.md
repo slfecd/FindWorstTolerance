@@ -28,8 +28,10 @@ FreeCAD macro
 
 ### ソースコード
 
-- SPDX-License-Identifier: LGPL-2.1-or-later OR Apache-2.0
-- SPDX-FileCopyrightText: 2026 ishikawa-slfecd  [slfecd (ishikawa)](https://github.com/slfecd)
+``` text
+# SPDX-FileCopyrightText: 2026 ishikawa-slfecd  [slfecd (ishikawa)](https://github.com/slfecd)
+# SPDX-License-Identifier: LGPL-2.1-or-later OR Apache-2.0
+```
 
 ### アイコン
 

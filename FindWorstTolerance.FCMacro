@@ -11,11 +11,13 @@
 # - FreeCAD v1.1.1 : Python v3.11.14
 # - Windows10 64bit
 
+
+# ruff: noqa: I001
 from typing import Final, TypeAlias, cast
 from dataclasses import dataclass
 
 import os
-import re
+import re  # 正規表現
 import xml.etree.ElementTree as ET
 
 import FreeCAD as App
@@ -70,13 +72,10 @@ def get_element_name(se: ShapeElement) -> str:
         se.feature_obj.Shape.findSubShape(se.element),  # type: ignore[attr-defined]  # freecad-stubs (1.0.21) に定義なし
     )
 
-    if False and element_type_name is None:
-        App.Console.PrintLog(
-            f"Shape.findSubShape() return is None. Feature:{se.feature_obj.Label}({se.feature_obj.Name}) , ShapeType:{se.feature_obj.Shape.ShapeType}\n"
-        )
-    # assert element_type_name is not None, (
-    #     "FreeCAD returned None for subshape type name."
-    # )
+    # if element_type_name is None:
+    #     App.Console.PrintLog(
+    #         f"Shape.findSubShape() return is None. Feature:{se.feature_obj.Label}({se.feature_obj.Name}) , ShapeType:{se.feature_obj.Shape.ShapeType}\n"
+    #     )
 
     return (
         f"{element_type_name}{element_index}" if element_type_name is not None else ""
@@ -217,7 +216,7 @@ def element_add_selection(
             # データム点選択
             Gui.Selection.addSelection(doc.Name, d_point.Name)
 
-    return
+    # return
 
 
 # main
@@ -278,7 +277,7 @@ def get_package_meta(xml_filename: str = "package.xml") -> PackageMeta | None:
         root: Final = ET.fromstring(xml_data_clean)
 
     except (ET.ParseError, PermissionError, KeyError) as e:
-        App.Console.PrintError(f"XML Parse Error: {str(e)}\n")
+        App.Console.PrintError(f"XML Parse Error: {e}\n")
         return None
 
     if "package" != root.tag:

@@ -7,6 +7,7 @@
 # - FreeCAD Ver1.1.1 : Python v3.11.14
 # - Windows10 64bit
 
+# ruff:noqa: I001
 from typing import Final, cast
 
 import os
@@ -72,7 +73,7 @@ def main() -> bool:
             if not FLAG_DRY_RUN:
                 shutil.copy2(file_name, dest_path)  # 日付属性もコピー
             print(f"  {file_name}")
-        except Exception as e:
+        except OSError as e:
             print(f"***Error: {file_name} のコピーに失敗しました。理由: {e}")
             return False
     # for
@@ -80,6 +81,6 @@ def main() -> bool:
     return True
 
 
-#
+##
 if __name__ == "__main__":
     main()

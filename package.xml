@@ -27,9 +27,5 @@
             <file>FindWorstTolerance.FCMacro</file>
             <icon>FindWorstTolerance.svg</icon>
         </macro>
-        <other>
-            <subdirectory>./</subdirectory>
-            <file>FindWorstTolerance.svg</file> <!-- 効果なし -->
-        </other>
     </content>
 </package>
