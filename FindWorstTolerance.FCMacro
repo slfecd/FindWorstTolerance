@@ -24,10 +24,11 @@ import FreeCAD as App
 import FreeCADGui as Gui
 import Part  # FreeCAD ワークベンチ
 
+__date__: Final[str] = "2026/08/03"  # YMD
 
+MACRO_NAME: Final[str] = "FindWorstTolerance"
 FLAG_SAME_WORST_TOLERANCE_MODE: Final[bool] = True  # 同値ワースト要素を全探索
 FLAG_ADD_DATUM_POINT: Final[bool] = False  # True=データム点を追加
-
 
 Ttyp_SubShape: TypeAlias = Part.Vertex | Part.Edge | Part.Face
 
@@ -258,13 +259,14 @@ class PackageMeta:
 def get_package_meta(xml_filename: str = "package.xml") -> PackageMeta | None:
     """
     パッケージ名、バージョン番号、マクロ名を取得
-    - カレントディレクトリのpackage.xmlファイルを読む
+    - package.xmlファイルからメタ情報を取得
     - https://wiki.freecad.org/Package_Metadata
     """
 
-    # マクロファイルと同じディレクトリのパスを取得
-    current_dir: Final = os.path.dirname(os.path.abspath(__file__))
-    xml_path: Final = os.path.join(current_dir, xml_filename)
+    # アドインマネージャーのインストーラーがzip展開するディレクトリ
+    xml_path: Final = os.path.join(
+        App.getUserAppDataDir(), "Mod", MACRO_NAME, xml_filename
+    )
     if not os.path.exists(xml_path):
         return None  # Error
 
@@ -293,17 +295,18 @@ def get_package_meta(xml_filename: str = "package.xml") -> PackageMeta | None:
 
     # メタ取得
     meta: PackageMeta = PackageMeta()
-    meta.name = get_meta_text("name", "Macro")
+    meta.name = get_meta_text("name", MACRO_NAME)
     meta.version = get_meta_text("version", "0.0.0")
-    meta.macro_name = get_meta_text("./content/macro/name", "Macro")
+    meta.macro_name = get_meta_text("./content/macro/name", MACRO_NAME)
 
     return meta
 
 
 # マクロの実行
 if __name__ == "__main__":
-    if (meta := get_package_meta("package.xml")) is None:
-        meta = PackageMeta(macro_name="Macro", version="0.0.0")
+    if (meta := get_package_meta()) is None:
+        App.Console.PrintLog("package.xml読み込み失敗\n")
+        meta = PackageMeta(macro_name=MACRO_NAME, version="0.0.0")
 
     App.Console.PrintMessage(f"*** START: {meta.macro_name} v{meta.version}\n")
     main()
