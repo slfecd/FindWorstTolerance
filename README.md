@@ -7,17 +7,16 @@ FreeCAD macro
 
 トレランス値ワースト要素(Vertex, Edge, Face)を探して選択状態にします
 
-## 目的
-
-## インストール方法
-
-- アドインマネージャに対応予定
-- 設定にリポジトリ追加
-
 ### 動作確認環境
 
 - FreeCAD v1.1.1
 - Windows10 64bit
+
+## 目的
+
+## インストール方法
+
+アドインマネージャに対応予定
 
 ## 操作手順
 
@@ -27,10 +26,14 @@ FreeCAD macro
 
 ## ライセンス
 
-``` Python
-# SPDX-FileCopyrightText: 2026 ishikawa-slfecd  [slfecd (ishikawa)](https://github.com/slfecd)
-# SPDX-License-Identifier: LGPL-2.1-or-later OR Apache-2.0
-```
+### ソースコード
+
+- SPDX-License-Identifier: LGPL-2.1-or-later OR Apache-2.0
+- SPDX-FileCopyrightText: 2026 ishikawa-slfecd  [slfecd (ishikawa)](https://github.com/slfecd)
+
+### アイコン
+
+準備中
 
 ## バージョン履歴
 
