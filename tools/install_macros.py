@@ -17,7 +17,7 @@ import fnmatch
 import FreeCAD as App
 
 
-__date__: Final[str] = "2026/08/03"  # YMD
+__date__: Final[str] = "2026-08-03"  # YMD
 
 
 FLAG_DRY_RUN: Final[bool] = False  # True=シミュレーション動作  False=本番動作
@@ -70,9 +70,7 @@ def main() -> bool:
 
     # カレントディレクトリ取得 /tools/../
     src_dir: Final = (
-        os.path.normpath(
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "../")
-        )
+        os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
         if "__file__" in globals()
         else ""
     )

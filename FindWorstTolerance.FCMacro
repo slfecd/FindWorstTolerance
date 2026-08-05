@@ -24,7 +24,7 @@ import FreeCAD as App
 import FreeCADGui as Gui
 import Part  # FreeCAD ワークベンチ
 
-__date__: Final[str] = "2026/08/03"  # YMD
+__date__: Final[str] = "2026-08-03"  # YMD
 
 MACRO_NAME: Final[str] = "FindWorstTolerance"
 FLAG_SAME_WORST_TOLERANCE_MODE: Final[bool] = True  # 同値ワースト要素を全探索

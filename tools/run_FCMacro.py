@@ -19,7 +19,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 
 
-__date__: Final = "2026/08/03"  # YMD
+__date__: Final = "2026-08-03"  # YMD
 
 
 def clear_report_view() -> None:
