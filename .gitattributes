@@ -1,0 +1,7 @@
+# アーカイブ(zipファイル)に含めないファイルを指定
+?*/ export-ignore
+.*  export-ignore
+*.code-workspace export-ignore
+*.log     export-ignore
+*log.txt  export-ignore
+*list.txt export-ignore
