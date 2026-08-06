@@ -32,23 +32,13 @@ FreeCAD macro
 
 ## ライセンス
 
-### ソースコード
-
-``` text
-# SPDX-FileCopyrightText: 2026 ishikawa-slfecd  [slfecd (ishikawa-slfecd)](https://github.com/slfecd)
-# SPDX-License-Identifier: LGPL-2.1-or-later OR Apache-2.0
-```
-
-- [LGPL-2.1-or-later](LICENSE-LGPL-2.1)
-- [Apache-2.0](LICENSE-Apache-2.0)
-
-### アイコン
-
-準備中
+- ソースコード：[GNU Lesser General Public License v2.1 or later (LGPL-2.1-or-later)](LICENSE-LGPL-2.1) or [Apache License 2.0 (Apache-2.0)](LICENSE-Apache-2.0)
+- アイコン：[Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/legalcode.en)
+- Copyright 2026 ishikawa-slfecd
+  - [GitHub - slfecd (ishikawa-slfecd)](https://github.com/slfecd)
 
 ## バージョン履歴
 
 ## 今後の予定（は未定かもしれない）
 
-- アドイン・マネージャー対応
 - GUI化
