@@ -1,44 +1,48 @@
 # Find worst tolerance
 
-準備中  
+This text has been machine-translated from Japanese.
+
+Under construction  
 FreeCAD macro
 
-## 概要
+[日本語で表示](README-ja.md)
 
-トレランス値ワースト要素(Vertex, Edge, Face)を探して選択状態にします
+## Summary
 
-### 動作確認環境
+Finds elements (Vertex, Edge, Face) with the worst tolerance values and selects them.
+
+### Tested Environment
 
 - FreeCAD v1.1.3
-- Windows10 64bit
+- Windows 10 64-bit
 
-## 目的
+## Objective
 
-## インストール方法
+## Installation
 
-1. リポジトリ追加
-2. アドインマネージャ
-3. ツールバー登録方法？
+1. Add repository
+2. Addon Manager
+3. Toolbar registration method?
 
-## 操作手順
+## Operating Procedure
 
-1. 選択
-2. マクロ実行
-3. 結果確認
+1. Select
+2. Execute macro
+3. Check results
 
-- ワースト・トレラントの各要素（頂点、エッジ、面）を探す
-  - FreeCADのトレランス初期値を超える要素を選択状態にする（選択色に変化）
-  - レポートビューに結果表示
+- Find elements with the worst tolerances (vertices, edges, faces)
+  - Select elements that exceed FreeCAD's default tolerance values (changes to selection color)
+  - Display results in the Report view
 
-## ライセンス
+## License
 
-- ソースコード：[GNU Lesser General Public License v2.1 or later (LGPL-2.1-or-later)](LICENSE-LGPL-2.1) or [Apache License 2.0 (Apache-2.0)](LICENSE-Apache-2.0)
-- アイコン：[Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/legalcode.en)
+- Source code: [GNU Lesser General Public License v2.1 or later (LGPL-2.1-or-later)](LICENSE-LGPL-2.1) or [Apache License 2.0 (Apache-2.0)](LICENSE-Apache-2.0)
+- Icon: [Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/legalcode.en)
 - Copyright 2026 ishikawa-slfecd
   - [GitHub - slfecd (ishikawa-slfecd)](https://github.com/slfecd)
 
-## バージョン履歴
+## Version History
 
-## 今後の予定（は未定かもしれない）
+## Future Plans (Subject to change)
 
-- GUI化
+- Add a GUI
