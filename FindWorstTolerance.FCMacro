@@ -1,12 +1,12 @@
+# SPDX-FileCopyrightText: 2026 ishikawa-slfecd  [slfecd (ishikawa-slfecd)](https://github.com/slfecd)
+# SPDX-License-Identifier: LGPL-2.1-or-later OR Apache-2.0
+
 # AI生成物を元に改変しています
 # - ワースト・トレラントの各要素（頂点、エッジ、面）を探す
 #   - FreeCADのトレランス初期値を超える要素を選択状態にする（選択色に変化）
 #   - レポートビューに結果表示
 # - データム頂点の追加オプション：頂点を選択しても色変化しない事があるため
 # - バージョン情報などは package.xml を参照してね
-#
-# SPDX-FileCopyrightText: 2026 ishikawa-slfecd  [slfecd (ishikawa)](https://github.com/slfecd)
-# SPDX-License-Identifier: LGPL-2.1-or-later OR Apache-2.0
 #
 # - FreeCAD v1.1.1 : Python v3.11.14
 # - Windows10 64bit
@@ -24,7 +24,7 @@ import FreeCAD as App
 import FreeCADGui as Gui
 import Part  # FreeCAD ワークベンチ
 
-__date__: Final[str] = "2026-08-03"  # YMD
+__date__: Final[str] = "2026-08-06"  # YMD
 
 MACRO_NAME: Final[str] = "FindWorstTolerance"
 FLAG_SAME_WORST_TOLERANCE_MODE: Final[bool] = True  # 同値ワースト要素を全探索
