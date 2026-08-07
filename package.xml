@@ -3,9 +3,8 @@
     <name>FindWorstTolerance</name>
     <version>0.3.3</version>
     <date>2026-08-07</date> <!-- YYYY-MM-DD -->
-    <description>
-        Finds and selects the worst tolerance elements (Vertex, Edge, Face) exceeding the default threshold.
-        トレランス値ワースト要素(Vertex, Edge, Face)を探して選択状態にします
+    <description>Finds and selects the worst tolerance elements (Vertex, Edge, Face) exceeding the default threshold.
+トレランス値ワースト要素(Vertex, Edge, Face)を探して選択状態にします
     </description>
 
     <license file="LICENSE-LGPL-2.1"  >LGPL-2.1-or-later</license>
@@ -15,11 +14,7 @@
     <author     email="310196093+slfecd@users.noreply.github">ishikawa-slfecd</author>
 
     <!-- 開発用ブランチ : blob ではなく raw が正解 -->
-    <url type="repository" branch="main"   >https://github.com/slfecd/FindWorstTolerance</url>
-    <url type="repository" branch="dev"    >https://github.com/slfecd/FindWorstTolerance</url>
     <url type="repository" branch="dev-wip">https://github.com/slfecd/FindWorstTolerance</url>
-    <url type="readme"                     >https://github.com/slfecd/FindWorstTolerance/raw/main/README.md</url>
-    <url type="readme"                     >https://github.com/slfecd/FindWorstTolerance/raw/dev/README.md</url>
     <url type="readme"                     >https://github.com/slfecd/FindWorstTolerance/raw/dev-wip/README.md</url>
 
     <icon>FindWorstTolerance.svg</icon>
