@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 ishikawa-slfecd  [slfecd (ishikawa-slfecd)](https://github.com/slfecd)
+# SPDX-License-Identifier: LGPL-2.1-or-later OR Apache-2.0
+
 # AI生成物を元に改変しています
 # - ワースト・トレラントの各要素（頂点、エッジ、面）を探す
 #   - FreeCADのトレランス初期値を超える要素を選択状態にする（選択色に変化）
@@ -8,21 +11,24 @@
 # - FreeCAD v1.1.1 : Python v3.11.14
 # - Windows10 64bit
 
+
+# ruff: noqa: I001
 from typing import Final, TypeAlias, cast
 from dataclasses import dataclass
 
 import os
-import re
+import re  # 正規表現
 import xml.etree.ElementTree as ET
 
 import FreeCAD as App
 import FreeCADGui as Gui
 import Part  # FreeCAD ワークベンチ
 
+__date__: Final[str] = "2026-08-06"  # YMD
 
+MACRO_NAME: Final[str] = "FindWorstTolerance"
 FLAG_SAME_WORST_TOLERANCE_MODE: Final[bool] = True  # 同値ワースト要素を全探索
 FLAG_ADD_DATUM_POINT: Final[bool] = False  # True=データム点を追加
-
 
 Ttyp_SubShape: TypeAlias = Part.Vertex | Part.Edge | Part.Face
 
@@ -67,13 +73,10 @@ def get_element_name(se: ShapeElement) -> str:
         se.feature_obj.Shape.findSubShape(se.element),  # type: ignore[attr-defined]  # freecad-stubs (1.0.21) に定義なし
     )
 
-    if False and element_type_name is None:
-        App.Console.PrintLog(
-            f"Shape.findSubShape() return is None. Feature:{se.feature_obj.Label}({se.feature_obj.Name}) , ShapeType:{se.feature_obj.Shape.ShapeType}\n"
-        )
-    # assert element_type_name is not None, (
-    #     "FreeCAD returned None for subshape type name."
-    # )
+    # if element_type_name is None:
+    #     App.Console.PrintLog(
+    #         f"Shape.findSubShape() return is None. Feature:{se.feature_obj.Label}({se.feature_obj.Name}) , ShapeType:{se.feature_obj.Shape.ShapeType}\n"
+    #     )
 
     return (
         f"{element_type_name}{element_index}" if element_type_name is not None else ""
@@ -214,7 +217,7 @@ def element_add_selection(
             # データム点選択
             Gui.Selection.addSelection(doc.Name, d_point.Name)
 
-    return
+    # return
 
 
 # main
@@ -256,13 +259,14 @@ class PackageMeta:
 def get_package_meta(xml_filename: str = "package.xml") -> PackageMeta | None:
     """
     パッケージ名、バージョン番号、マクロ名を取得
-    - カレントディレクトリのpackage.xmlファイルを読む
+    - package.xmlファイルからメタ情報を取得
     - https://wiki.freecad.org/Package_Metadata
     """
 
-    # マクロファイルと同じディレクトリのパスを取得
-    current_dir: Final = os.path.dirname(os.path.abspath(__file__))
-    xml_path: Final = os.path.join(current_dir, xml_filename)
+    # アドインマネージャーのインストーラーがzip展開するディレクトリ
+    xml_path: Final = os.path.join(
+        App.getUserAppDataDir(), "Mod", MACRO_NAME, xml_filename
+    )
     if not os.path.exists(xml_path):
         return None  # Error
 
@@ -275,7 +279,7 @@ def get_package_meta(xml_filename: str = "package.xml") -> PackageMeta | None:
         root: Final = ET.fromstring(xml_data_clean)
 
     except (ET.ParseError, PermissionError, KeyError) as e:
-        App.Console.PrintError(f"XML Parse Error: {str(e)}\n")
+        App.Console.PrintError(f"XML Parse Error: {e}\n")
         return None
 
     if "package" != root.tag:
@@ -291,17 +295,18 @@ def get_package_meta(xml_filename: str = "package.xml") -> PackageMeta | None:
 
     # メタ取得
     meta: PackageMeta = PackageMeta()
-    meta.name = get_meta_text("name", "Macro")
+    meta.name = get_meta_text("name", MACRO_NAME)
     meta.version = get_meta_text("version", "0.0.0")
-    meta.macro_name = get_meta_text("./content/macro/name", "Macro")
+    meta.macro_name = get_meta_text("./content/macro/name", MACRO_NAME)
 
     return meta
 
 
 # マクロの実行
 if __name__ == "__main__":
-    if (meta := get_package_meta("package.xml")) is None:
-        meta = PackageMeta(macro_name="Macro", version="0.0.0")
+    if (meta := get_package_meta()) is None:
+        App.Console.PrintLog("package.xml読み込み失敗\n")
+        meta = PackageMeta(macro_name=MACRO_NAME, version="0.0.0")
 
     App.Console.PrintMessage(f"*** START: {meta.macro_name} v{meta.version}\n")
     main()

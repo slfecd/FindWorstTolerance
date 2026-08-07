@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 ishikawa-slfecd  [slfecd (ishikawa-slfecd)](https://github.com/slfecd)
+# SPDX-License-Identifier: LGPL-2.1-or-later OR Apache-2.0
+
 # AI生成物を元に改変しています
 # テストランナー
 # - モデルツリー内の要素を選択して find_worst_tolerances.FCMacro を実行する
@@ -7,6 +10,7 @@
 # - FreeCAD Ver1.1.1 : Python v3.11.14
 # - Windows10 64bit
 
+# ruff:noqa: I001
 from typing import Final, TypeAlias
 import traceback
 
@@ -15,7 +19,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 
 
-__date__: Final = "2026/07/12"  # YMD
+__date__: Final = "2026-08-06"  # YMD
 
 
 def clear_report_view() -> None:
@@ -35,18 +39,21 @@ def run_macro(path: str) -> bool:
     """マクロを実行：成功True エラーFalse を返す"""
     try:
         with open(path, encoding="utf-8") as f:
-            code = f.read()
+            code: Final = f.read()
+    except OSError as e:
+        print(f"\n[ERROR] マクロファイルの読み込みに失敗しました: {path}. 理由: {e}")
+        return False
 
-        exec(code, globals().copy())
-        return True
-
-    except Exception as e:
+    try:
+        exec(code, globals().copy())  # noqa: S102
+        return True  # 正常終了
+    except Exception as e:  # noqa: BLE001
         print(f"\n[ERROR] マクロ実行中にエラーが発生しました: {e}")
         traceback.print_exc()  # スタックトレースをレポートビューに出力
         return False
 
 
-#
+##
 Type_SelectionList: TypeAlias = list[tuple[str, str] | tuple[str, str, str]]
 
 
@@ -82,7 +89,7 @@ def main(single_run_index: None | int = None) -> bool | None:
         ],
     ]
 
-    #
+    ##
     clear_report_view()
     flag: bool | None = None
 
@@ -102,6 +109,6 @@ def main(single_run_index: None | int = None) -> bool | None:
     return flag
 
 
-#
+##
 if __name__ == "__main__":
     main()
