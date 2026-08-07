@@ -4,7 +4,7 @@ Under construction
 FreeCAD macro  
 This text has been machine-translated from Japanese.
 
-[日本語で読む](#概要)
+[後半に日本語版があります](#japanese-version)
 
 ## Summary
 
@@ -42,18 +42,21 @@ Finds elements (Vertex, Edge, Face) with the worst tolerance values and selects 
 
 ## Version History
 
-## Future Plans (Subject to change)
+## Future Plans
 
-- Add a GUI
+- Improve README.md
+- May add a GUI eventually
 
 ---
 ---
----
+
+## Japanese version
+
+準備中  
+FreeCAD macro
 
 ## 概要
 
-準備中  
-FreeCAD macro  
 トレランス値ワースト要素(Vertex, Edge, Face)を探して選択状態にします
 
 ### 動作確認環境
