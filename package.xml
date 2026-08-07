@@ -14,8 +14,8 @@
     <author     email="310196093+slfecd@users.noreply.github">ishikawa-slfecd</author>
 
     <!-- 開発用ブランチ : blob ではなく raw が正解 -->
-    <url type="repository" branch="dev-wip">https://github.com/slfecd/FindWorstTolerance</url>
-    <url type="readme"                     >https://github.com/slfecd/FindWorstTolerance/raw/dev-wip/README.md</url>
+    <url type="repository" branch="dev">https://github.com/slfecd/FindWorstTolerance</url>
+    <url type="readme"                 >https://github.com/slfecd/FindWorstTolerance/raw/dev/README.md</url>
 
     <icon>FindWorstTolerance.svg</icon>
     <freecadmin>1.0.0</freecadmin>
