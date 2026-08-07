@@ -5,7 +5,7 @@ This text has been machine-translated from Japanese.
 Under construction  
 FreeCAD macro
 
-[日本語で表示](README-ja.md)
+[日本語で表示（ブラウザ起動）](README-ja.md)
 
 ## Summary
 
