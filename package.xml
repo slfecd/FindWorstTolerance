@@ -13,8 +13,9 @@
     <maintainer email="310196093+slfecd@users.noreply.github">ishikawa-slfecd</maintainer>
     <author     email="310196093+slfecd@users.noreply.github">ishikawa-slfecd</author>
 
-    <url type="repository" branch="main">https://github.com/slfecd/FindWorstTolerance</url>
-    <url type="readme"                  >https://github.com/slfecd/FindWorstTolerance/raw/main/README.md</url>
+    <!-- ***開発用ブランチ*** -->
+    <url type="repository" branch="dev">https://github.com/slfecd/FindWorstTolerance</url>
+    <url type="readme"                 >https://github.com/slfecd/FindWorstTolerance/raw/dev/README.md</url>
 
     <icon>FindWorstTolerance.svg</icon>
     <freecadmin>1.0.0</freecadmin>
