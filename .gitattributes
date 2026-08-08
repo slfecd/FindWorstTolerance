@@ -2,10 +2,10 @@
 * text=auto eol=lf
 
 # アーカイブ(zipファイル)に含めないファイルを指定
-?*/ export-ignore
-.*  export-ignore
-*.code-workspace export-ignore
-*.odg     export-ignore
-*.log     export-ignore
-*log.txt  export-ignore
-*list.txt export-ignore
+# ?*/ export-ignore
+# .*  export-ignore
+# *.code-workspace export-ignore
+# *.odg     export-ignore
+# *.log     export-ignore
+# *log.txt  export-ignore
+# *list.txt export-ignore
