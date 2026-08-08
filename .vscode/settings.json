@@ -1,4 +1,6 @@
 {
+	"files.eol": "\n",
+
 	"python.defaultInterpreterPath": "C:\\Program Files\\FreeCAD 1.1\\bin\\python.exe",
 	"python.autoComplete.extraPaths": [
 		"C:/Program Files/FreeCAD 1.1/Mod",
@@ -8,6 +10,7 @@
 		"C:/Program Files/FreeCAD 1.1/Mod",
 		"C:/Program Files/FreeCAD 1.1/bin/Lib/site-packages"
 	],
+
 	"python.analysis.typeCheckingMode": "strict",
 	"python.analysis.diagnosticSeverityOverrides": {
 		"reportUnknownVariableType": "warning",

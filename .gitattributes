@@ -1,3 +1,6 @@
+# GitHubアーカイブ(zip)ファイル内の改行コードが全て LF になり、FreeCADのアドオンマネージャーの挙動が狂うので LF に統一する
+* text=auto eol=lf
+
 # アーカイブ(zipファイル)に含めないファイルを指定
 ?*/ export-ignore
 .*  export-ignore
