@@ -1,3 +1,6 @@
+# 改行コード
+* text=auto eol=lf
+
 # アーカイブ(zipファイル)に含めないファイルを指定
 # ?*/ export-ignore
 # .*  export-ignore

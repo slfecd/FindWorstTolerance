@@ -24,13 +24,13 @@ import FreeCAD as App
 import FreeCADGui as Gui
 import Part  # FreeCAD ワークベンチ
 
-__date__: Final[str] = "2026-08-06"  # YMD
+__date__: Final[str] = "2026-08-09"  # YMD
 
 MACRO_NAME: Final[str] = "FindWorstTolerance"
 FLAG_SAME_WORST_TOLERANCE_MODE: Final[bool] = True  # 同値ワースト要素を全探索
 FLAG_ADD_DATUM_POINT: Final[bool] = False  # True=データム点を追加
 
-Ttyp_SubShape: TypeAlias = Part.Vertex | Part.Edge | Part.Face
+Type_SubShape: TypeAlias = Part.Vertex | Part.Edge | Part.Face
 
 
 @dataclass
@@ -39,7 +39,7 @@ class ShapeElement:
     #   - Document.Feature.Shape.(element)
     #   - Feature.Document
     feature_obj: Part.Feature  # Body, Sketch, AdditivePipe, Boolean, Fillet, etc...
-    element: Ttyp_SubShape
+    element: Type_SubShape
 
 
 def collect_element(obj: Part.Feature) -> list[ShapeElement] | None:
@@ -51,10 +51,10 @@ def collect_element(obj: Part.Feature) -> list[ShapeElement] | None:
     shape: Final = cast(Part.Shape, obj.Shape)
 
     all_raw_elements: Final = cast(
-        Ttyp_SubShape, [*shape.Vertexes, *shape.Edges, *shape.Faces]
+        Type_SubShape, [*shape.Vertexes, *shape.Edges, *shape.Faces]
     )
     element_list: list[ShapeElement] = [
-        ShapeElement(element=cast(Ttyp_SubShape, el), feature_obj=obj)
+        ShapeElement(element=cast(Type_SubShape, el), feature_obj=obj)
         for el in all_raw_elements  # pyright: ignore[reportUnknownVariableType]
     ]
 
@@ -70,7 +70,7 @@ def get_element_name(se: ShapeElement) -> str:
 
     (element_type_name, element_index) = cast(
         tuple[str | None, int],
-        se.feature_obj.Shape.findSubShape(se.element),  # type: ignore[attr-defined]  # freecad-stubs (1.0.21) に定義なし
+        se.feature_obj.Shape.findSubShape(se.element),  # type: ignore[attr-defined]  # freecad-stubs-1.0.21 に定義なし
     )
 
     # if element_type_name is None:
@@ -106,7 +106,7 @@ def find_worst_tolerance(obj: Part.Feature) -> list[ShapeElement] | None:
     @dataclass
     class TargetElement:
         prefix: str
-        obj_class: type[Ttyp_SubShape]
+        obj_class: type[Type_SubShape]
 
     target_definitions: Final[list[TargetElement]] = [
         TargetElement("[Vertex] ", Part.Vertex),
@@ -186,7 +186,7 @@ def element_add_selection(
 
     for item in element_list:
         obj = item.feature_obj
-        element = cast(Ttyp_SubShape, item.element)  # リンター警告バグ？
+        element = cast(Type_SubShape, item.element)  # リンター警告バグ？
         element_name = get_element_name(item)
         Gui.Selection.addSelection(obj.Document.Name, obj.Name, element_name)
 
