@@ -18,4 +18,12 @@
 		"reportUnknownMemberType": "none",
 		"reportUnknownArgumentType": "warning"
 	},
+	"cSpell.flagWords": [
+		"アドイン:アドオン"
+	],
+	"cSpell.words": [
+		"FreeCAD",
+		"ishikawa",
+		"slfecd"
+	]
 }
