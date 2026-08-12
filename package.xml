@@ -10,10 +10,9 @@
     <license file="LICENSE-LGPL-2.1"  >LGPL-2.1-or-later</license>
     <license file="LICENSE-Apache-2.0">Apache-2.0</license>
 
-    <maintainer email="310196093+slfecd@users.noreply.github">ishikawa-slfecd</maintainer>
-    <author     email="310196093+slfecd@users.noreply.github">ishikawa-slfecd</author>
+    <maintainer email="310196093+slfecd@users.noreply.github.com">ishikawa-slfecd</maintainer>
+    <author     email="310196093+slfecd@users.noreply.github.com">ishikawa-slfecd</author>
 
-    <!-- <icon>FindWorstTolerance.svg</icon> -->
     <freecadmin>1.0.0</freecadmin>
     <pythonmin>3.10</pythonmin>
     <tag>Tolerance</tag>
