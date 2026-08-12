@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package format="1" xmlns="https://wiki.freecad.org/Package_Metadata">
     <name>FindWorstTolerance</name>
-    <version>0.3.5</version>
+    <version>0.3.6</version>
     <date>2026-08-09</date> <!-- YYYY-MM-DD -->
     <description>Finds and selects the worst tolerance elements (Vertex, Edge, Face) exceeding the default threshold.
 トレランス値ワースト要素(Vertex, Edge, Face)を探して選択状態にします
@@ -13,11 +13,7 @@
     <maintainer email="310196093+slfecd@users.noreply.github">ishikawa-slfecd</maintainer>
     <author     email="310196093+slfecd@users.noreply.github">ishikawa-slfecd</author>
 
-    <!-- ***開発用ブランチ*** -->
-    <url type="repository" branch="dev">https://github.com/slfecd/FindWorstTolerance</url>
-    <url type="readme"                 >https://github.com/slfecd/FindWorstTolerance/raw/dev/README.md</url>
-
-    <icon>FindWorstTolerance.svg</icon>
+    <!-- <icon>FindWorstTolerance.svg</icon> -->
     <freecadmin>1.0.0</freecadmin>
     <pythonmin>3.10</pythonmin>
     <tag>Tolerance</tag>
@@ -25,8 +21,12 @@
     <content>
         <macro>
             <name>Find worst tolerance</name>
+            <!-- ***開発用ブランチ*** -->
+            <url type="repository" branch="dev">https://github.com/slfecd/FindWorstTolerance</url>
+            <url type="readme"                 >https://github.com/slfecd/FindWorstTolerance/raw/dev/README.md</url>
             <subdirectory>./</subdirectory>
             <file>FindWorstTolerance.FCMacro</file>
+            <icon>FindWorstTolerance.svg</icon>
         </macro>
     </content>
 </package>
