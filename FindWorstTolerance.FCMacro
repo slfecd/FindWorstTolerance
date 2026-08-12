@@ -263,7 +263,7 @@ def get_package_meta(xml_filename: str = "package.xml") -> PackageMeta | None:
     - https://wiki.freecad.org/Package_Metadata
     """
 
-    # アドインマネージャーのインストーラーがzip展開するディレクトリ
+    # アドオンマネージャーのインストーラーがzip展開するディレクトリ
     xml_path: Final = os.path.join(
         App.getUserAppDataDir(), "Mod", MACRO_NAME, xml_filename
     )
