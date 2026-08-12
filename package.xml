@@ -13,11 +13,7 @@
     <maintainer email="310196093+slfecd@users.noreply.github">ishikawa-slfecd</maintainer>
     <author     email="310196093+slfecd@users.noreply.github">ishikawa-slfecd</author>
 
-    <!-- ***開発用ブランチ*** -->
-    <url type="repository" branch="dev">https://github.com/slfecd/FindWorstTolerance</url>
-    <url type="readme"                 >https://github.com/slfecd/FindWorstTolerance/raw/dev/README.md</url>
-
-    <icon>FindWorstTolerance.svg</icon>
+    <!-- <icon>FindWorstTolerance.svg</icon> -->
     <freecadmin>1.0.0</freecadmin>
     <pythonmin>3.10</pythonmin>
     <tag>Tolerance</tag>
@@ -25,8 +21,12 @@
     <content>
         <macro>
             <name>Find worst tolerance</name>
+            <!-- ***開発用ブランチ*** -->
+            <url type="repository" branch="dev-wip">https://github.com/slfecd/FindWorstTolerance</url>
+            <url type="readme"                     >https://github.com/slfecd/FindWorstTolerance/raw/dev-wip/README.md</url>
             <subdirectory>./</subdirectory>
             <file>FindWorstTolerance.FCMacro</file>
+            <icon>FindWorstTolerance.svg</icon>
         </macro>
     </content>
 </package>
