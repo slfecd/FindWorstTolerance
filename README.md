@@ -1,6 +1,5 @@
 # Find worst tolerance
 
-Under construction  
 FreeCAD macro  
 This text has been machine-translated from Japanese.
 
@@ -8,44 +7,100 @@ This text has been machine-translated from Japanese.
 
 ## Summary
 
-Finds elements (Vertex, Edge, Face) with the worst tolerance values and selects them.
+Finds elements (Vertex, Edge, Face) with the worst tolerance values and selects them (highlighted in the selection color).
 
 ### Tested Environment
 
-- FreeCAD v1.1.3
+- FreeCAD v1.1.3 (Python 3.11.14)
 - Windows 10 64-bit
+- git version 2.55.0.windows.4
 
 ## Objective
 
+Under construction
+
 ## Installation
 
-1. Add repository
-2. Addon Manager
-3. Toolbar registration method?
+1. Add a custom repository to the Addon Manager
+   1. Open the preferences screen
+      - Select **Edit** -> **Preferences** from the menu bar
+   2. Display the Addon Manager settings items
+      - Select **Addon Manager Options** from the list on the left side of the preferences screen
+   3. Configure the custom repository
+      1. Select the `+` button at the bottom right of the Custom repositories field
+      2. Enter (copy and paste) the following strings into the displayed dialog screen:
+         - Repository URL: `https://github.com/slfecd/FindWorstTolerance`
+         - Branch: `main`
+      3. Press the **OK** button at the bottom right of the dialog screen
+   4. Save settings and exit
+      - Press the **OK** button at the bottom right of the preferences screen
+2. Launch the Addon Manager
+   - Select **Tools** -> **Addon Manager** from the menu bar
+3. Select `FindWorstTolerance` from the list and install it
+4. Close the Addon Manager
 
 ## Operating Procedure
 
-1. Select
-2. Execute macro
-3. Check results
+1. Select the target object
+   - Select the target object from the model tree in the combo view
+2. Run the `Find worst tolerance` macro
+   1. Select **Macro** -> **Macros** from the menu bar
+   2. Select `FindWorstTolerance.FCMacro` from the User macros tab in the displayed dialog screen
+   3. Press the **Execute** button at the top right of the dialog screen
+3. Check the results
+   - Elements with the worst tolerance values will be selected (highlighted in the selection color)
+     - Selects elements that exceed FreeCAD's default tolerance value ($1 \times 10^{-7}$)
+   - Information on the elements with the worst tolerance values will be displayed in the Report view
+     - How to display the Report view: Check **View** -> **Panels** -> **Report view** checkbox in the menu bar
 
-- Find elements with the worst tolerances (vertices, edges, faces)
-  - Select elements that exceed FreeCAD's default tolerance values (changes to selection color)
-  - Display results in the Report view
+### Toolbar Registration Method (Manual)
+
+Under construction
+
+- Contemplating whether this should be written
+- Selecting icon files is a hassle
 
 ## License
 
-- Source code: [GNU Lesser General Public License v2.1 or later (LGPL-2.1-or-later)](LICENSE-LGPL-2.1) or [Apache License 2.0 (Apache-2.0)](LICENSE-Apache-2.0)
-- Icon: [Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/legalcode.en)
+- Source code: LGPL-2.1-or-later OR Apache-2.0
+  - [(LGPL-2.1)   GNU LESSER GENERAL PUBLIC LICENSE Version 2.1](LICENSE-LGPL-2.1)
+  - [(Apache-2.0) Apache License Version 2.0](LICENSE-Apache-2.0)
+- Icon: CC BY-SA 4.0
+  - (CC BY-SA 4.0) Creative Commons Attribution-ShareAlike 4.0 International: [https://creativecommons.org/licenses/by-sa/4.0/legalcode.en](https://creativecommons.org/licenses/by-sa/4.0/legalcode.en)
 - Copyright 2026 ishikawa-slfecd
   - [GitHub - slfecd (ishikawa-slfecd)](https://github.com/slfecd)
 
 ## Version History
 
+- vX.Y.Z : Y-M-D : Public initial release
+
 ## Future Plans
 
 - Improve README.md
 - May add a GUI eventually
+
+## Unorganized
+
+- Terminology notes
+  - Find worst tolerance
+  - Menu bar
+  - Dialog
+  - Report view
+  - Tolerance
+  - Model tree in combo view
+  - Python console
+
+- Analysis of the issue where the repair process triggers when launching the Addon Manager after initial installation
+  - It has been confirmed that this cannot be handled on the macro side.
+  - Behavior in environments where git is not installed has not been investigated.
+  - Based on reading the Addon Manager code, this behavior appears to be by design.
+  1. Installation methods are divided into three types. The following explanations relate to custom repositories.
+     - Custom repository / Addons other than catalog-listed macros / Catalog-listed macros
+  2. All custom repositories are treated as workbench types.
+  3. Initial installation uses the ZIP file method.
+  4. Repair is triggered if the `mod/(addon name)/.git` directory does not exist at startup.
+  5. Repair performs a `git clone`. No branch name is specified.
+  6. Checking for updates is performed via `git fetch & status`.  
 
 ---
 ---
@@ -73,8 +128,8 @@ FreeCAD マクロ
 1. アドオンマネージャーにカスタムリポジトリを追加する
    1. 設定画面を表示する
       - メニューバーの 編集(Edit) → 設定(Preferences) を選択
-   2. アドオン・マネージャーの設定項目を表示する
-      - 設定画面の左側リストから アドオン・マネージャー(Addon Manager Options) を選択
+   2. アドオンマネージャーの設定項目を表示する
+      - 設定画面の左側リストから アドオンマネージャー(Addon Manager Options) を選択
    3. カスタムリポジトリを設定する
       1. カスタムリポジトリ欄の右下の［＋］ボタンを選択
       2. 表示されるダイアログ画面に次の文字列を入力（コピー＆ペースト）する
@@ -92,13 +147,13 @@ FreeCAD マクロ
 
 1. 対象オブジェクトを選択する
    - コンボビューのモデルツリーから対象オブジェクトを選択する
-2. Find worst tolerance マクロを実行する
+2. `Find worst tolerance` マクロを実行する
    1. メニューバーの マクロ(Macro) → マクロ(Macros) を選択
    2. 表示されるダイアログ画面のユーザーマクロ・タブから `FindWorstTolerance.FCMacro` を選択する
    3. ダイアログ画面の右上の［実行］ボタンを押す
 3. 結果を確認する
    - トレランス値ワースト要素が選択状態になります（選択色にハイライトされる）
-     - FreeCADのトレランス初期値($1 \times 10^{-7}$)を超える要素を選択状態にします
+     - FreeCADのトレランス初期値($1 \times 10^{-7}$)を超える要素を選択します
    - レポートビューにトレランス値ワースト要素の情報が表示されます
      - レポートビューの表示方法：メニューバーの 表示(View) → パネル(Panels) → レポートビュー(Report View)チェックボックス にチェックを入れる
 
@@ -140,13 +195,13 @@ FreeCAD マクロ
   - Pythonコンソール
 
 - 初回インストール後にアドオンマネージャーを起動するとリペア処理が発動する件の解析
-  - マクロ側では対応できないことが確定しました。
+  - マクロ側では対応できないことが確定しました
   - gitがインストールされて無い環境での挙動は調べていない
-  - アドオンマネージャーのコードを解読した感じでは、この挙動は仕様の様です
-  1. インストール方法が３種類に別れている。以降の説明はカスタムリポジトリに関します。
-     - カスタムリポジトリ／カタログ掲載のマクロ以外のアドオン／カタログ記載のマクロ@Wiki
+  - アドオンマネージャーのコードを調べた感じでは、この挙動は仕様の様です。
+  1. インストール方法が３種類に別れている。以降の説明はカスタムリポジトリに関して行います。
+     - カスタムリポジトリ／カタログ掲載のマクロ以外のアドオン／カタログ記載のマクロ
   2. カスタムリポジトリは全てワークベンチ型として扱われる
   3. 初回インストールはZIPファイル方式
-  4. 起動時に mod/アドオン名/.git ディレクトリが存在しないとリペア発動
+  4. 次回起動時に `mod/(アドオン名)/.git` ディレクトリが存在しないとリペア発動
   5. リペアは git clone が行われる。ブランチ名の指定はない。
   6. 更新の有無の確認は git fetch & status で行われる
