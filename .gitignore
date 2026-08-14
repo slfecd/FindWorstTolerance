@@ -9,8 +9,8 @@
 !/.vscode/settings.json
 
 !*.FCMacro
-!*.svg
 !*.xml
+!/*.svg
 !README.md
 !LICENSE*
 
