@@ -7,12 +7,12 @@ This text has been machine-translated from Japanese.
 
 ## Summary
 
-Finds elements (Vertex, Edge, Face) with the worst tolerance values and selects them (highlighted in the selection color).
+Finds elements (Vertex, Edge, Face) with the worst tolerance values and selects them (highlighted in the selection color)
 
 ### Tested Environment
 
 - FreeCAD v1.1.3 (Python 3.11.14)
-- Windows 10 64-bit
+- Windows10 64bit
 - git version 2.55.0.windows.4
 
 ## Objective
@@ -35,7 +35,7 @@ Under construction
    4. Save settings and exit
       - Press the **OK** button at the bottom right of the preferences screen
 2. Launch the Addon Manager
-   - Select **Tools** -> **Addon Manager** from the menu bar
+      - Select **Tools** -> **Addon Manager** from the menu bar
 3. Select `FindWorstTolerance` from the list and install it
 4. Close the Addon Manager
 
@@ -49,16 +49,50 @@ Under construction
    3. Press the **Execute** button at the top right of the dialog screen
 3. Check the results
    - Elements with the worst tolerance values will be selected (highlighted in the selection color)
-     - Selects elements that exceed FreeCAD's default tolerance value ($1 \times 10^{-7}$)
+      - Selects elements that exceed FreeCAD's default tolerance value ($1 \times 10^{-7}$)
    - Information on the elements with the worst tolerance values will be displayed in the Report view
-     - How to display the Report view: Check **View** -> **Panels** -> **Report view** checkbox in the menu bar
+      - How to display the Report view: Check **View** -> **Panels** -> **Report view** checkbox in the menu bar
 
 ### Toolbar Registration Method (Manual)
 
-Under construction
+1. Preparation
+   - The tricky part of toolbar registration is registering the **full path of the directory** where the icon file is located
+   - It is easier if you copy the full path string to the clipboard in advance
+   - We have prepared a script that automatically copies it to the clipboard.  
+     If you copy and paste this script into FreeCAD's Python console screen and run it, the full path string will be copied to the clipboard.  
+   - How to display the Python console screen: Check **View** -> **Panels** -> **Python Console** checkbox in the menu bar
 
-- Contemplating whether this should be written
-- Selecting icon files is a hassle
+     ``` Python
+     import os, FreeCAD; from PySide.QtGui import QApplication; p = os.path.join(FreeCAD.getUserAppDataDir(), "Mod", "FindWorstTolerance"); QApplication.clipboard().setText(p); print(f"Copied the full path name of the icon directory to the clipboard: {p}")
+     ```
+
+2. Open the Execute Macro screen
+   1. Select **Macro** -> **Macros** from the menu bar
+   2. Select `FindWorstTolerance.FCMacro` from the User macros tab in the dialog screen
+   3. Press the **Toolbar** button on the dialog screen
+   4. If a confirmation screen appears, it is a good idea to select the **OK** button
+
+3. The Walkthrough Dialog 1/2 screen is displayed
+   1. Confirm that the macro item is `FindWorstTolerance.FCMacro`
+   2. Select the **[...]** button for the icon item
+   3. The Choose Icon screen is displayed
+      1. Select the **Icon folders** button at the bottom left of the screen
+      2. The Icon Folders screen is displayed
+         1. Select the `+` button
+         2. The Add icon folder screen is displayed
+            1. Paste the full path string from the clipboard into the folder field
+            2. Select the **Choose folder** button
+         3. Select the **OK** button
+      3. Select the `FindWorstTolerance.svg` icon, which is probably displayed near the end or beginning <!-- markdownlint-disable-line MD033 --><img src="./FindWorstTolerance.svg" width="32" alt="FindWorstTolerance.svg">
+   4. Select the **Add** button
+   5. Select the **Close** button
+
+4. The Walkthrough Dialog 2/2 screen is displayed
+   1. Select the **->** button
+   2. Select the **Close** button
+
+5. Select the **Close** button on the Execute Macro screen
+6. Finished (Good job!)
 
 ## License
 
@@ -66,7 +100,7 @@ Under construction
   - [(LGPL-2.1)   GNU LESSER GENERAL PUBLIC LICENSE Version 2.1](LICENSE-LGPL-2.1)
   - [(Apache-2.0) Apache License Version 2.0](LICENSE-Apache-2.0)
 - Icon: CC BY-SA 4.0
-  - (CC BY-SA 4.0) Creative Commons Attribution-ShareAlike 4.0 International: [https://creativecommons.org/licenses/by-sa/4.0/legalcode.en](https://creativecommons.org/licenses/by-sa/4.0/legalcode.en)
+  - (CC BY-SA 4.0) Creative Commons Attribution-ShareAlike 4.0 International : [https://creativecommons.org/licenses/by-sa/4.0/legalcode.en](https://creativecommons.org/licenses/by-sa/4.0/legalcode.en)
 - Copyright 2026 ishikawa-slfecd
   - [GitHub - slfecd (ishikawa-slfecd)](https://github.com/slfecd)
 
@@ -78,29 +112,6 @@ Under construction
 
 - Improve README.md
 - May add a GUI eventually
-
-## Unorganized
-
-- Terminology notes
-  - Find worst tolerance
-  - Menu bar
-  - Dialog
-  - Report view
-  - Tolerance
-  - Model tree in combo view
-  - Python console
-
-- Analysis of the issue where the repair process triggers when launching the Addon Manager after initial installation
-  - It has been confirmed that this cannot be handled on the macro side.
-  - Behavior in environments where git is not installed has not been investigated.
-  - Based on reading the Addon Manager code, this behavior appears to be by design.
-  1. Installation methods are divided into three types. The following explanations relate to custom repositories.
-     - Custom repository / Addons other than catalog-listed macros / Catalog-listed macros
-  2. All custom repositories are treated as workbench types.
-  3. Initial installation uses the ZIP file method.
-  4. Repair is triggered if the `mod/(addon name)/.git` directory does not exist at startup.
-  5. Repair performs a `git clone`. No branch name is specified.
-  6. Checking for updates is performed via `git fetch & status`.  
 
 ---
 ---
@@ -180,8 +191,8 @@ FreeCAD マクロ
    1. 項目マクロが `FindWorstTolerance.FCMacro` であることを確認する
    2. 項目アイコンの［…］ボタンを選択
    3. アンコンを選択してください(Choose Icon) 画面が表示される
-      1. 画面左下の［アイコンフォルダー］ボタンを選択
-      2. Icon Folders 画面が表示される
+      1. 画面左下の［アイコンフォルダー(Icon Folders)］ボタンを選択
+      2. アイコンフォルダー(Icon Folders) 画面が表示される
          1. ［＋］ボタンを選択
          2. アイコンフォルダーを追加 画面が表示される
             1. フォルダー欄へクリップボードからフルパス文字列をペースト
