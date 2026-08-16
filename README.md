@@ -7,12 +7,12 @@ This text has been machine-translated from Japanese.
 
 ## Summary
 
-Finds elements (Vertex, Edge, Face) with the worst tolerance values and selects them (highlighted in the selection color).
+Finds elements (Vertex, Edge, Face) with the worst tolerance values and selects them (highlighted in the selection color)
 
 ### Tested Environment
 
 - FreeCAD v1.1.3 (Python 3.11.14)
-- Windows 10 64-bit
+- Windows10 64bit
 - git version 2.55.0.windows.4
 
 ## Objective
@@ -35,7 +35,7 @@ Under construction
    4. Save settings and exit
       - Press the **OK** button at the bottom right of the preferences screen
 2. Launch the Addon Manager
-   - Select **Tools** -> **Addon Manager** from the menu bar
+      - Select **Tools** -> **Addon Manager** from the menu bar
 3. Select `FindWorstTolerance` from the list and install it
 4. Close the Addon Manager
 
@@ -49,16 +49,50 @@ Under construction
    3. Press the **Execute** button at the top right of the dialog screen
 3. Check the results
    - Elements with the worst tolerance values will be selected (highlighted in the selection color)
-     - Selects elements that exceed FreeCAD's default tolerance value ($1 \times 10^{-7}$)
+      - Selects elements that exceed FreeCAD's default tolerance value ($1 \times 10^{-7}$)
    - Information on the elements with the worst tolerance values will be displayed in the Report view
-     - How to display the Report view: Check **View** -> **Panels** -> **Report view** checkbox in the menu bar
+      - How to display the Report view: Check **View** -> **Panels** -> **Report view** checkbox in the menu bar
 
 ### Toolbar Registration Method (Manual)
 
-Under construction
+1. Preparation
+   - The tricky part of toolbar registration is registering the **full path of the directory** where the icon file is located
+   - It is easier if you copy the full path string to the clipboard in advance
+   - We have prepared a script that automatically copies it to the clipboard.  
+     If you copy and paste this script into FreeCAD's Python console screen and run it, the full path string will be copied to the clipboard.  
+   - How to display the Python console screen: Check **View** -> **Panels** -> **Python Console** checkbox in the menu bar
 
-- Contemplating whether this should be written
-- Selecting icon files is a hassle
+     ``` Python
+     import os, FreeCAD; from PySide.QtGui import QApplication; p = os.path.join(FreeCAD.getUserAppDataDir(), "Mod", "FindWorstTolerance"); QApplication.clipboard().setText(p); print(f"Copied the full path name of the icon directory to the clipboard: {p}")
+     ```
+
+2. Open the Execute Macro screen
+   1. Select **Macro** -> **Macros** from the menu bar
+   2. Select `FindWorstTolerance.FCMacro` from the User macros tab in the dialog screen
+   3. Press the **Toolbar** button on the dialog screen
+   4. If a confirmation screen appears, it is a good idea to select the **OK** button
+
+3. The Walkthrough Dialog 1/2 screen is displayed
+   1. Confirm that the macro item is `FindWorstTolerance.FCMacro`
+   2. Select the **[...]** button for the icon item
+   3. The Choose Icon screen is displayed
+      1. Select the **Icon folders** button at the bottom left of the screen
+      2. The Icon Folders screen is displayed
+         1. Select the `+` button
+         2. The Add icon folder screen is displayed
+            1. Paste the full path string from the clipboard into the folder field
+            2. Select the **Choose folder** button
+         3. Select the **OK** button
+      3. Select the `FindWorstTolerance.svg` icon, which is probably displayed near the end or beginning <!-- markdownlint-disable-line MD033 --><img src="./FindWorstTolerance.svg" width="32" alt="FindWorstTolerance.svg">
+   4. Select the **Add** button
+   5. Select the **Close** button
+
+4. The Walkthrough Dialog 2/2 screen is displayed
+   1. Select the **->** button
+   2. Select the **Close** button
+
+5. Select the **Close** button on the Execute Macro screen
+6. Finished (Good job!)
 
 ## License
 
@@ -66,7 +100,7 @@ Under construction
   - [(LGPL-2.1)   GNU LESSER GENERAL PUBLIC LICENSE Version 2.1](LICENSE-LGPL-2.1)
   - [(Apache-2.0) Apache License Version 2.0](LICENSE-Apache-2.0)
 - Icon: CC BY-SA 4.0
-  - (CC BY-SA 4.0) Creative Commons Attribution-ShareAlike 4.0 International: [https://creativecommons.org/licenses/by-sa/4.0/legalcode.en](https://creativecommons.org/licenses/by-sa/4.0/legalcode.en)
+  - (CC BY-SA 4.0) Creative Commons Attribution-ShareAlike 4.0 International : [https://creativecommons.org/licenses/by-sa/4.0/legalcode.en](https://creativecommons.org/licenses/by-sa/4.0/legalcode.en)
 - Copyright 2026 ishikawa-slfecd
   - [GitHub - slfecd (ishikawa-slfecd)](https://github.com/slfecd)
 
@@ -78,29 +112,6 @@ Under construction
 
 - Improve README.md
 - May add a GUI eventually
-
-## Unorganized
-
-- Terminology notes
-  - Find worst tolerance
-  - Menu bar
-  - Dialog
-  - Report view
-  - Tolerance
-  - Model tree in combo view
-  - Python console
-
-- Analysis of the issue where the repair process triggers when launching the Addon Manager after initial installation
-  - It has been confirmed that this cannot be handled on the macro side.
-  - Behavior in environments where git is not installed has not been investigated.
-  - Based on reading the Addon Manager code, this behavior appears to be by design.
-  1. Installation methods are divided into three types. The following explanations relate to custom repositories.
-     - Custom repository / Addons other than catalog-listed macros / Catalog-listed macros
-  2. All custom repositories are treated as workbench types.
-  3. Initial installation uses the ZIP file method.
-  4. Repair is triggered if the `mod/(addon name)/.git` directory does not exist at startup.
-  5. Repair performs a `git clone`. No branch name is specified.
-  6. Checking for updates is performed via `git fetch & status`.  
 
 ---
 ---
@@ -159,10 +170,44 @@ FreeCAD マクロ
 
 ### ツールバーへの登録方法（手動）
 
-準備中
+1. 準備
+   - ツールバー登録の難所はアイコンファイルのある**ディレクトリのフルパスを登録**する作業です
+   - あらかじめクリップボードにフルパス文字列をコピーしておくと作業が楽になります
+   - 自動的にクリップボードへコピーするスクリプトを準備しました。  
+      FreeCADのPythonコンソール画面へ、このスクリプトをコピー＆ペーストして実行すると、フルパス文字列がクリップボードへコピーされた状態になります。  
+   - Pythonコンソール画面の表示方法：メニューバーの 表示(View) → パネル(Panels) → Pythonコンソール(Python Console)チェックボックス にチェックを入れる
 
-- 記述するべきか悩み中
-- アイコンファイルの選択が大変
+      ``` Python
+      import os, FreeCAD; from PySide.QtGui import QApplication; p = os.path.join(FreeCAD.getUserAppDataDir(), "Mod", "FindWorstTolerance"); QApplication.clipboard().setText(p); print(f"クリップボードにアイコンのディレクトリのフルパス名をコピーしました : {p}")
+      ```
+
+2. マクロを実行 画面を表示する
+   1. メニューバーの マクロ(Macro) → マクロ(Macros) を選択
+   2. ダイアログ画面のユーザーマクロ・タブから `FindWorstTolerance.FCMacro` を選択する
+   3. ダイアログ画面の［ツールバー］ボタンを押す
+   4. 確認画面が出た場合は［ＯＫ］ボタンを選択すると良いでしょう
+
+3. ウォークスルー・ダイアログ1/2 画面が表示される
+   1. 項目マクロが `FindWorstTolerance.FCMacro` であることを確認する
+   2. 項目アイコンの［…］ボタンを選択
+   3. アンコンを選択してください(Choose Icon) 画面が表示される
+      1. 画面左下の［アイコンフォルダー(Icon Folders)］ボタンを選択
+      2. アイコンフォルダー(Icon Folders) 画面が表示される
+         1. ［＋］ボタンを選択
+         2. アイコンフォルダーを追加 画面が表示される
+            1. フォルダー欄へクリップボードからフルパス文字列をペースト
+            2. ［フォルダーの選択］ボタンを選択
+         3. ［ＯＫ］ボタンを選択
+      3. おそらく末尾や先頭付近に表示されている <!-- markdownlint-disable-line MD033 --><img src="./FindWorstTolerance.svg" width="32" alt="FindWorstTolerance.svg"> `FindWorstTolerance.svg` アイコンを選択する
+   4. ［追加］ボタンを選択
+   5. ［閉じる］ボタンを選択
+
+4. ウォークスルー・ダイアログ2/2 画面が表示される
+   1. ［→］ボタンを選択
+   2. ［閉じる］ボタンを選択
+
+5. マクロを実行 画面の［閉じる］ボタンを選択
+6. 終了（お疲れさまでした）
 
 ## ライセンス
 
@@ -182,26 +227,3 @@ FreeCAD マクロ
 
 - README.md の整備
 - そのうちGUI化するかもしれない
-
-## 未整理
-
-- 用語メモ
-  - Find worst tolerance
-  - メニューバー
-  - ダイアログ
-  - レポートビュー
-  - トレランス
-  - コンボビューのモデルツリー
-  - Pythonコンソール
-
-- 初回インストール後にアドオンマネージャーを起動するとリペア処理が発動する件の解析
-  - マクロ側では対応できないことが確定しました
-  - gitがインストールされて無い環境での挙動は調べていない
-  - アドオンマネージャーのコードを調べた感じでは、この挙動は仕様の様です。
-  1. インストール方法が３種類に別れている。以降の説明はカスタムリポジトリに関して行います。
-     - カスタムリポジトリ／カタログ掲載のマクロ以外のアドオン／カタログ記載のマクロ
-  2. カスタムリポジトリは全てワークベンチ型として扱われる
-  3. 初回インストールはZIPファイル方式
-  4. 次回起動時に `mod/(アドオン名)/.git` ディレクトリが存在しないとリペア発動
-  5. リペアは git clone が行われる。ブランチ名の指定はない。
-  6. 更新の有無の確認は git fetch & status で行われる

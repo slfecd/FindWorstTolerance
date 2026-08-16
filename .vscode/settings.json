@@ -20,11 +20,12 @@
 	},
 
 	"cSpell.flagWords": [
-		"アドイン:アドオン"
+		"アドイン:アドオン",
+		"フォルダ:フォルダー",
 	],
 	"cSpell.words": [
 		"FreeCAD",
 		"ishikawa",
-		"slfecd"
-	]
+		"slfecd",
+	],
 }
