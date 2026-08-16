@@ -1,11 +1,13 @@
 # 改行コード
 * text=auto eol=lf
 
+# Gitでの差分表示の際にPython言語用の構文解析ルールを適用
+*.FCMacro text diff=python
+
+# GitHub上でPythonコードとして認識させ、適切なハイライトや言語統計を表示させる
+*.FCMacro linguist-language=Python
+
+
 # アーカイブ(zipファイル)に含めないファイルを指定
 ?*/ export-ignore
 .*  export-ignore
-# *.code-workspace export-ignore
-*.odg     export-ignore
-*.log     export-ignore
-*log.txt  export-ignore
-*list.txt export-ignore
