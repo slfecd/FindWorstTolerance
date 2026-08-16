@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package format="1" xmlns="https://wiki.freecad.org/Package_Metadata">
     <name>FindWorstTolerance</name>
-    <version>0.3.6</version>
-    <date>2026-08-09</date> <!-- YYYY-MM-DD -->
+    <version>0.3.7</version>
+    <date>2026-08-12</date> <!-- YYYY-MM-DD -->
     <description>Finds and selects the worst tolerance elements (Vertex, Edge, Face) exceeding the default threshold.
 トレランス値ワースト要素(Vertex, Edge, Face)を探して選択状態にします
     </description>
@@ -10,10 +10,9 @@
     <license file="LICENSE-LGPL-2.1"  >LGPL-2.1-or-later</license>
     <license file="LICENSE-Apache-2.0">Apache-2.0</license>
 
-    <maintainer email="310196093+slfecd@users.noreply.github">ishikawa-slfecd</maintainer>
-    <author     email="310196093+slfecd@users.noreply.github">ishikawa-slfecd</author>
+    <maintainer email="310196093+slfecd@users.noreply.github.com">ishikawa-slfecd</maintainer>
+    <author     email="310196093+slfecd@users.noreply.github.com">ishikawa-slfecd</author>
 
-    <!-- <icon>FindWorstTolerance.svg</icon> -->
     <freecadmin>1.0.0</freecadmin>
     <pythonmin>3.10</pythonmin>
     <tag>Tolerance</tag>

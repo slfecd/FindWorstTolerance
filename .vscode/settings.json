@@ -18,6 +18,7 @@
 		"reportUnknownMemberType": "none",
 		"reportUnknownArgumentType": "warning"
 	},
+
 	"cSpell.flagWords": [
 		"アドイン:アドオン",
 		"フォルダ:フォルダー",

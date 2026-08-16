@@ -24,7 +24,7 @@ import FreeCAD as App
 import FreeCADGui as Gui
 import Part  # FreeCAD ワークベンチ
 
-__date__: Final[str] = "2026-08-09"  # YMD
+__date__: Final[str] = "2026-08-13"  # YMD
 
 MACRO_NAME: Final[str] = "FindWorstTolerance"
 FLAG_SAME_WORST_TOLERANCE_MODE: Final[bool] = True  # 同値ワースト要素を全探索
@@ -65,7 +65,7 @@ def get_element_name(se: ShapeElement) -> str:
     """要素から Vertex1 Edge2 Face3 のような名前を返す"""
 
     assert hasattr(se.feature_obj, "Shape"), (
-        "ShapeElement.feature_obj に Shapeオブジェクトが必要です"
+        "ShapeElement.feature_obj requires a Shape object. （ShapeElement.feature_obj に Shapeオブジェクトが必要です）"
     )
 
     (element_type_name, element_index) = cast(
@@ -88,7 +88,9 @@ def find_worst_tolerance(obj: Part.Feature) -> list[ShapeElement] | None:
 
     worst_element_list: list[ShapeElement] = []  # 戻り値
 
-    STR_ELEMENT_NOT_FOUND: Final[str] = "有効な要否が見つかりません\n"
+    STR_ELEMENT_NOT_FOUND: Final[str] = (
+        "No valid elements found. （有効な要素が見つかりません）\n"
+    )
 
     # トレランス閾値（FreeCAD設定値）取得：超えたら要素選択
     TOLERANCE_TH: Final = cast(float, Part.Precision.confusion())  # type: ignore
@@ -96,7 +98,9 @@ def find_worst_tolerance(obj: Part.Feature) -> list[ShapeElement] | None:
         f"FreeCAD returned Part.Precision.confusion() != 1E-7 : {TOLERANCE_TH:G}"
     )
 
-    App.Console.PrintMessage(f"=== トレランス ワースト: {obj.Label} ({obj.FullName})\n")
+    App.Console.PrintMessage(
+        f"=== Worst tolerance （トレランス ワースト）: {obj.Label} ({obj.FullName})\n"
+    )
 
     element_list: Final = collect_element(obj)
     if not element_list:
@@ -226,7 +230,7 @@ def main() -> None:
     check_objects: Final[list[Part.Feature]] = Gui.Selection.getSelection("*")
     if not check_objects:
         App.Console.PrintWarning(
-            "オブジェクトが選択されていません。モデルツリーでオブジェクトを選択してから実行してください。\n"
+            "Select an object in the model tree first. （モデルツリーでオブジェクトを選択してから実行してください）\n"
         )
         return
 
@@ -305,7 +309,7 @@ def get_package_meta(xml_filename: str = "package.xml") -> PackageMeta | None:
 # マクロの実行
 if __name__ == "__main__":
     if (meta := get_package_meta()) is None:
-        App.Console.PrintLog("package.xml読み込み失敗\n")
+        App.Console.PrintLog("Failed to load package.xml （package.xml読み込み失敗）\n")
         meta = PackageMeta(macro_name=MACRO_NAME, version="0.0.0")
 
     App.Console.PrintMessage(f"*** START: {meta.macro_name} v{meta.version}\n")
