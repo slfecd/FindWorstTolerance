@@ -83,7 +83,7 @@ Under construction
             1. Paste the full path string from the clipboard into the folder field
             2. Select the **Choose folder** button
          3. Select the **OK** button
-      3. ![FindWorstTolerance_thumb.png](./Documentation/FindWorstTolerance_thumb.png) Select the `FindWorstTolerance.svg` icon, which is probably displayed near the end or beginning
+      3. ![FindWorstTolerance icon](Documentation/FindWorstTolerance_thumb.png) Select the `FindWorstTolerance.svg` icon, which is probably displayed near the end or beginning
    4. Select the **Add** button
    5. Select the **Close** button
 
@@ -198,7 +198,7 @@ FreeCAD マクロ
             1. フォルダー欄へクリップボードからフルパス文字列をペースト
             2. ［フォルダーの選択］ボタンを選択
          3. ［ＯＫ］ボタンを選択
-      3. おそらく末尾や先頭付近に表示されている `FindWorstTolerance.svg` アイコン ![FindWorstTolerance_thumb.png](./Documentation/FindWorstTolerance_thumb.png) を選択する
+      3. おそらく末尾や先頭付近に表示されている `FindWorstTolerance.svg` アイコン ![FindWorstToleranceアイコン](Documentation/FindWorstTolerance_thumb.png) を選択する
    4. ［追加］ボタンを選択
    5. ［閉じる］ボタンを選択
 
