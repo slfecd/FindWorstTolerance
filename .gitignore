@@ -15,5 +15,8 @@
 !LICENSE*
 
 !/tools/
+!/tools/*.odg
 !*.py
-!*.odg
+
+!/Documentation/
+!/Documentation/*.png
